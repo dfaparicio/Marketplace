@@ -70,7 +70,6 @@ const upload = multer({
 });
 
 // Exports Nombrados
-
 export const subirImagenProducto = upload.single("imagen_producto");
 export const subirAvatarUsuario = upload.single("avatar_usuario");
 // Si necesitas subir múltiples imágenes de un producto en el futuro:
