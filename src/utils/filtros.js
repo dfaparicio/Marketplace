@@ -1,9 +1,12 @@
-const parsearLista = (valor, tipo = "string") => {
+// Parsea una cadena separada por comas en una lista de tipos específicos
+
+export const parsearLista = (valor, tipo = "string") => {
   if (!valor) return null;
   const lista = valor
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+
   switch (tipo) {
     case "int":
       return lista.map((item) => parseInt(item)).filter((num) => !isNaN(num));
@@ -13,7 +16,10 @@ const parsearLista = (valor, tipo = "string") => {
       return lista;
   }
 };
-const parsearOrdenamiento = (orden) => {
+
+// Parsea el parámetro de ordenamiento (ej: "precio:asc,nombre:desc")
+
+export const parsearOrdenamiento = (orden) => {
   if (!orden) return [];
   const camposPermitidos = [
     "precio",
@@ -22,6 +28,7 @@ const parsearOrdenamiento = (orden) => {
     "stock",
     "id",
   ];
+
   return orden
     .split(",")
     .map((item) => {
@@ -37,14 +44,19 @@ const parsearOrdenamiento = (orden) => {
         ["ASC", "DESC"].includes(item.direccion),
     );
 };
-const construirFiltrosSQL = (filtros) => {
+
+// Construye dinámicamente la cláusula WHERE y sus parámetros para SQL
+
+export const construirFiltrosSQL = (filtros) => {
   const condiciones = [];
   const parametros = [];
+
   if (filtros.categorias && filtros.categorias.length > 0) {
     const placeholders = filtros.categorias.map(() => "?").join(",");
     condiciones.push(`p.categoria_id IN (${placeholders})`);
     parametros.push(...filtros.categorias);
   }
+
   if (filtros.precio) {
     if (filtros.precio.min !== undefined) {
       condiciones.push("p.precio >= ?");
@@ -55,18 +67,15 @@ const construirFiltrosSQL = (filtros) => {
       parametros.push(filtros.precio.max);
     }
   }
+
   if (filtros.busqueda) {
     condiciones.push("(p.nombre LIKE ? OR p.descripcion LIKE ?)");
     parametros.push(`%${filtros.busqueda}%`, `%${filtros.busqueda}%`);
   }
+
   return {
     whereClause:
       condiciones.length > 0 ? `AND ${condiciones.join(" AND ")}` : "",
     parametros,
   };
-};
-
-module.exports = {
-  parsearOrdenamiento,
-  construirFiltrosSQL,
 };

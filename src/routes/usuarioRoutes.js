@@ -1,20 +1,19 @@
-const express = require("express");
-const UsuarioController = require("../controllers/usuarioController");
-
-const {
+import express from "express";
+import { crear, listar, obtener } from "../controllers/usuarioController.js";
+import {
   validacionCrearUsuario,
   validacionParametroId,
-} = require("../middlewares/validaciones.js");
+} from "../middlewares/validaciones.js";
 
 const router = express.Router();
 
-// POST /api/usuarios - Crear usuario
-router.post("/", validacionCrearUsuario, UsuarioController.crear);
-
 // GET /api/usuarios - Listar usuarios
-router.get("/", UsuarioController.listar);
+router.get("/", listar);
 
 // GET /api/usuarios/:id - Obtener usuario por ID
-router.get("/:id", validacionParametroId, UsuarioController.obtener);
+router.get("/:id", validacionParametroId, obtener);
 
-module.exports = router;
+// POST /api/usuarios - Crear usuario
+router.post("/", validacionCrearUsuario, crear);
+
+export default router;

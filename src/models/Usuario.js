@@ -7,8 +7,8 @@ const usuario = new mongoose.Schema({
   rol: {
     type: String,
     required: true,
-    default: "COMPRADOR",
-    enum: ["COMPRADOR", "VENDEDOR", "ADMIN"],
+    default: "comprador",
+    enum: ["comprador", "vendedor", "admin"],
   },
   timestamps: {
     createdAt: "fecha_registro",

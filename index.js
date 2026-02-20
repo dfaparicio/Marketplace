@@ -1,20 +1,24 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import "dotenv/config"
+import helmet from "helmet";
+import "dotenv/config";
+
 import { conectarMongo } from "./src/config/database.js";
 
+// Aquí irían tus imports de rutas, por ejemplo:
+// import authRoutes from "./src/routes/authRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
-// Base de datos
+// Conexión a Base de Datos
 conectarMongo();
 
 // Middlewares globales
+app.use(helmet()); // Protege encabezados HTTP
 app.use(cors());
-app.use(morgan("combined"));
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -30,16 +34,10 @@ app.get("/", (req, res) => {
   });
 });
 
-// Manejo de errores global
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    error: true,
-    mensaje: err.message || "Error interno del servidor",
-  });
-});
+// app.use("/api/auth", authRoutes); // Ejemplo de uso de rutas
 
-// Middleware para rutas no encontradas
+// Manejo de rutas no encontradas (404)
+// Debe ir ANTES del manejador de errores global
 app.use((req, res) => {
   res.status(404).json({
     error: true,
@@ -47,9 +45,24 @@ app.use((req, res) => {
   });
 });
 
+// Manejo de errores global
+app.use((err, req, res, next) => {
+  // En producción no queremos mostrar todo el stack de error al cliente
+  const mensajeError =
+    process.env.NODE_ENV === "production"
+      ? "Error interno del servidor"
+      : err.message;
 
+  console.error("❌ Error Stack:", err.stack);
 
+  res.status(err.status || 500).json({
+    error: true,
+    mensaje: mensajeError,
+  });
+});
+
+// Inicio del servidor
 app.listen(PORT, () => {
-  console.log(` Servidor corriendo en puerto ${PORT}`);
-  console.log(` Logs: ${process.env.NODE_ENV || "development"}`);
+  console.log(`✅ Servidor corriendo en puerto ${PORT}`);
+  console.log(`🌍 Entorno: ${process.env.NODE_ENV || "development"}`);
 });
