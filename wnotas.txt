@@ -1,0 +1,24 @@
+1. autenticar (¿Quién eres?)
+Qué hace: Verifica si el usuario envió un token JWT válido.
+
+Por qué va primero: Si alguien ni siquiera está logueado (no hay token o está expirado), no tiene sentido preguntarle si es administrador o si el ID que busca es válido. Se le rechaza inmediatamente con un error 401.
+
+2. requiereRol("admin") (¿Tienes permiso para estar aquí?)
+Qué hace: Revisa si el usuario (que ya sabemos quién es gracias al paso anterior) tiene el rol necesario.
+
+Por qué va segundo: Si un "comprador" intenta acceder a esta ruta, se le bloquea con un error 403 (Prohibido). Rechazamos la petición antes de gastar memoria validando parámetros o consultando la base de datos.
+
+3. validacionParametroId (Prepara las reglas de los datos)
+Qué hace: Le dice a express-validator qué debe revisar (ej. "Asegúrate de que req.params.id tenga el formato de un MongoID válido").
+
+Por qué va tercero: Una vez que confirmamos que es un administrador legítimo, procedemos a revisar la información que nos está enviando.
+
+4. validarCampos (Ejecuta las reglas)
+Qué hace: Revisa el informe de errores del paso anterior. Si el ID no era un MongoID (por ejemplo, mandaron /api/usuarios/hola123), detiene el proceso y devuelve un error 400.
+
+Por qué va cuarto: Evita que le pases basura a tu controlador. Intentar buscar un usuario con el ID "hola123" en Mongoose haría que la base de datos arroje un error interno.
+
+5. obtener (El trabajo final)
+Qué hace: El controlador principal que va a la base de datos, busca el usuario y lo devuelve.
+
+Por qué va último: Tu controlador ahora puede trabajar con total tranquilidad. Sabe con certeza absoluta que: la persona está logueada, es un administrador, y el ID que mandó tiene el formato correcto.

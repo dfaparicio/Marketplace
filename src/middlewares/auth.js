@@ -1,5 +1,5 @@
 import { verificarToken, extraerTokenDeHeader } from "../utils/jwt.js";
-import { Usuario } from "../models/Usuario.js";
+import Usuario from "../models/Usuario.js";
 
 
 // Middleware para autenticar el JWT

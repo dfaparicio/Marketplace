@@ -1,18 +1,9 @@
 import bcrypt from "bcryptjs";
-import { validationResult } from "express-validator"; // Nota: usualmente no lleva .js si es de node_modules
-import { Usuario } from "../models/Usuario.js";
+import Usuario from "../models/Usuario.js";
 import { generarToken } from "../utils/jwt.js";
 
 export const registro = async (req, res, next) => {
   try {
-    const errores = validationResult(req);
-    if (!errores.isEmpty()) {
-      return res.status(400).json({
-        error: true,
-        mensaje: "Datos de registro inválidos",
-        errores: errores.array(),
-      });
-    }
 
     const { nombre, email, password, rol } = req.body;
     const usuarioExistente = await Usuario.buscarPorEmail(email);

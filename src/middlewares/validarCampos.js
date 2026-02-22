@@ -5,7 +5,7 @@ export const validarCampos = (req, res, next) => {
     return res.status(400).json({
       error: true,
       mensaje: "Errores de validación",
-      errores: errors.array(), 
+      errores: errors.array(),
     });
   }
   next();

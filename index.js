@@ -8,6 +8,7 @@ import { conectarMongo } from "./src/config/database.js";
 
 // Aquí irían tus imports de rutas, por ejemplo:
 // import authRoutes from "./src/routes/authRoutes.js";
+import usuarioRoutes from "./src/routes/usuarioRoutes.js"
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +36,8 @@ app.get("/", (req, res) => {
 });
 
 // app.use("/api/auth", authRoutes); // Ejemplo de uso de rutas
+app.use("/api/usuarios", usuarioRoutes)
+
 
 // Manejo de rutas no encontradas (404)
 // Debe ir ANTES del manejador de errores global

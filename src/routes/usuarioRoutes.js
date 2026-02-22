@@ -4,16 +4,22 @@ import {
   validacionCrearUsuario,
   validacionParametroId,
 } from "../middlewares/validaciones.js";
+import { validarCampos } from "../middlewares/validarCampos.js";
+import { autenticar, requiereRol } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-// GET /api/usuarios - Listar usuarios
-router.get("/", listar);
+router.get("/", autenticar, requiereRol("admin"), validarCampos, listar);
 
-// GET /api/usuarios/:id - Obtener usuario por ID
-router.get("/:id", validacionParametroId, obtener);
+router.get(
+  "/:id",
+  autenticar,
+  requiereRol("admin"),
+  validacionParametroId,
+  validarCampos,
+  obtener,
+);
 
-// POST /api/usuarios - Crear usuario
-router.post("/", validacionCrearUsuario, crear);
+router.post("/", validacionCrearUsuario, validarCampos, crear);
 
 export default router;
