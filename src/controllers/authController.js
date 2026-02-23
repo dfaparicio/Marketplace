@@ -1,12 +1,13 @@
 import bcrypt from "bcryptjs";
 import Usuario from "../models/Usuario.js";
 import { generarToken } from "../utils/jwt.js";
+import { validationResult } from 'express-validator';
 
 export const registro = async (req, res, next) => {
   try {
 
     const { nombre, email, password, rol } = req.body;
-    const usuarioExistente = await Usuario.buscarPorEmail(email);
+    const usuarioExistente = await Usuario.findOne({email});
 
     if (usuarioExistente) {
       return res.status(409).json({
@@ -48,7 +49,7 @@ export const login = async (req, res, next) => {
     }
 
     const { email, password } = req.body;
-    const usuario = await Usuario.buscarPorEmail(email);
+    const usuario = await Usuario.findOne({email});
 
     if (!usuario) {
       return res.status(401).json({
@@ -88,7 +89,7 @@ export const login = async (req, res, next) => {
 export const perfil = async (req, res, next) => {
   try {
     // Asumiendo que el middleware de auth ya inyectó req.usuario
-    const usuario = await Usuario.buscarPorId(req.usuario.id);
+    const usuario = await Usuario.findById(req.usuario.id);
 
     if (!usuario) {
       return res.status(404).json({

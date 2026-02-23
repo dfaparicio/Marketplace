@@ -20,6 +20,7 @@ const PORT = process.env.PORT || 3000;
 // Conexión a Base de Datos
 conectarMongo();
 
+
 // Middlewares globales
 app.use(helmet()); // Protege encabezados HTTP
 app.use(cors());

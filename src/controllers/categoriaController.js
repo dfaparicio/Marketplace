@@ -31,7 +31,7 @@ export const crear = async (req, res, next) => {
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const categorias = await Categorias.buscarPorId(id);
+    const categorias = await Categorias.findById(id);
 
     if (!categorias) {
       return res.status(404).json({
@@ -75,7 +75,7 @@ export const actualizar = async (req, res, next) => {
     const { id } = req.params;
     const { nombre, descripcion, imagen_icono } = req.body;
 
-    const categoriaExistente = await Categorias.buscarPorId(id);
+    const categoriaExistente = await Categorias.findById(id);
     if (!categoriaExistente) {
       return res.status(404).json({
         error: true,

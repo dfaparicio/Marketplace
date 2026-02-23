@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import Usuario from "./Usuario";
+import mongoose, { Schema }from "mongoose";
 
 const orden = new mongoose.Schema(
   {

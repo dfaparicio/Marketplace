@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+mongoose.set('debug', true);
+
 async function conectarMongo() {
   if (mongoose.connection.readyState === 1) {
     console.log("⏭️ MongoDB ya estaba conectado");

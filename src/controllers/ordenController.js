@@ -24,7 +24,7 @@ export const crear = async (req, res, next) => {
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const orden = await Orden.buscarPorId(id);
+    const orden = await Orden.findById(id);
 
     if (!orden) {
       return res.json(404).json({
@@ -42,7 +42,7 @@ export const obtener = async (req, res, next) => {
   }
 };
 
-export const filtrar = async (req, res, next) => {
+export const listar = async (req, res, next) => {
   try {
     const filtros = {
       comprador_id: req.query.comprador,

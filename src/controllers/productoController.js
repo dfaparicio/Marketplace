@@ -34,7 +34,7 @@ export const crear = async (req, res, next) => {
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const producto = await Producto.buscarPorId(id);
+    const producto = await Producto.findById(id);
 
     if (!producto) {
       return res.json(404).json({
@@ -81,7 +81,7 @@ export const actualizar = async (req, res, next) => {
     const { id } = req.params;
     const { nombre, descripcion, precio, stock, imagen_url } = req.body;
 
-    const prodcutoExistente = await Usuario.buscarPorId(id);
+    const prodcutoExistente = await Usuario.findById(id);
     if (!prodcutoExistente) {
       return res.status(404).json({
         error: true,
@@ -107,7 +107,7 @@ export const eliminar = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const productoExistente = await Usuario.buscarPorId(id);
+    const productoExistente = await Usuario.findById(id);
     if (!productoExistente) {
       return res.status(404).json({
         error: true,

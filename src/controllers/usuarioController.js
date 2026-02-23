@@ -6,7 +6,7 @@ export const crear = async (req, res, next) => {
 
     const { nombre, email, password, rol } = req.body;
 
-    const usuarioExistente = await Usuario.buscarPorEmail(email);
+    const usuarioExistente = await Usuario.findOne({email});
     if (usuarioExistente) {
       return res.status(409).json({
         error: true,
@@ -36,7 +36,7 @@ export const crear = async (req, res, next) => {
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const usuario = await Usuario.buscarPorId(id);
+    const usuario = await Usuario.findById(id);
 
     if (!usuario) {
       return res.status(404).json({
@@ -80,7 +80,7 @@ export const actualizar = async (req, res, next) => {
     const { id } = req.params;
     const { nombre, email, password, rol } = req.body;
 
-    const usuarioExistente = await Usuario.buscarPorId(id);
+    const usuarioExistente = await Usuario.findById(id);
     if (!usuarioExistente) {
       return res.status(404).json({
         error: true,
@@ -110,7 +110,7 @@ export const eliminar = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const usuarioExistente = await Usuario.buscarPorId(id);
+    const usuarioExistente = await Usuario.findById(id);
     if (!usuarioExistente) {
       return res.status(404).json({
         error: true,
