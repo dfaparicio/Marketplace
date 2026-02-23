@@ -3,9 +3,9 @@ import path from "path";
 import fs from "fs";
 
 // Configuración Inicial
-
 const crearDirectorios = () => {
-  const directorios = ["uploads", "uploads/productos", "uploads/usuarios"];
+  // Solo directorios para productos y categorías
+  const directorios = ["uploads", "uploads/productos", "uploads/categorias"];
   directorios.forEach((dir) => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -13,17 +13,18 @@ const crearDirectorios = () => {
   });
 };
 
-// Creamos los directorios al cargar el módulo
 crearDirectorios();
 
 // Configuración de Almacenamiento
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let carpeta = "uploads/productos";
-    if (file.fieldname === "avatar_usuario") {
-      carpeta = "uploads/usuarios";
+    let carpeta = "uploads/productos"; // Por defecto a productos
+
+    // Si el campo se llama imagen_icono, va a categorías
+    if (file.fieldname === "imagen_icono") {
+      carpeta = "uploads/categorias";
     }
+
     cb(null, carpeta);
   },
   filename: (req, file, cb) => {
@@ -37,7 +38,6 @@ const storage = multer.diskStorage({
 });
 
 // Filtro de Archivos
-
 const fileFilter = (req, file, cb) => {
   const tiposPermitidos = [
     "image/jpeg",
@@ -59,7 +59,6 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Instancia de Multer
-
 const upload = multer({
   storage,
   fileFilter,
@@ -69,8 +68,6 @@ const upload = multer({
   },
 });
 
-// Exports Nombrados
-export const subirImagenProducto = upload.single("imagen_producto");
-export const subirAvatarUsuario = upload.single("avatar_usuario");
-// Si necesitas subir múltiples imágenes de un producto en el futuro:
-export const subirGaleriaProducto = upload.array("imagenes_producto", 5);
+// Exports Nombrados para usar en las rutas
+export const subirImagenProducto = upload.single("imagen_url");
+export const subirIconoCategoria = upload.single("imagen_icono");

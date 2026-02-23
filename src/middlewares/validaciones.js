@@ -130,3 +130,55 @@ export const validacionActualizarUsuario = [
     .optional()
     .isIn(["admin", "comprador", "vendedor"]),
 ];
+
+export const validacionActualizarProducto = [
+  body("nombre")
+    .optional()
+    .notEmpty()
+    .withMessage("El nombre no puede estar vacío")
+    .isString()
+    .withMessage("El nombre debe ser un texto"),
+
+  body("descripcion")
+    .optional()
+    .notEmpty()
+    .withMessage("La descripción no puede estar vacía")
+    .isString()
+    .withMessage("La descripción debe ser un texto"),
+
+  body("precio")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("El precio debe ser un número mayor o igual a 0"),
+
+  body("stock")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("El stock debe ser un número entero y no puede ser negativo"),
+
+  body("imagen_url")
+    .optional()
+    .isURL()
+    .withMessage("La imagen debe ser una URL válida"),
+];
+
+export const validacionActualizarCategoria = [
+  body("nombre")
+    .optional()
+    .notEmpty()
+    .withMessage("El nombre no puede estar vacío")
+    .isString()
+    .withMessage("El nombre debe ser un texto"),
+
+  body("descripcion")
+    .optional()
+    .notEmpty()
+    .withMessage("La descripción no puede estar vacía")
+    .isString()
+    .withMessage("La descripción debe ser un texto"),
+
+  body("imagen_icono")
+    .optional()
+    .isString()
+    .withMessage("El icono debe ser un texto o ruta válida"),
+];

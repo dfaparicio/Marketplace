@@ -106,7 +106,7 @@ router.get(
  *       400:
  *         description: Error en la validación de los campos enviados
  */
-// POST /api/usuarios - Crear usuario (Registro público o creación manual)
+// POST /api/usuarios - Crear usuario 
 router.post("/", validacionCrearUsuario, validarCampos, crear);
 
 /**

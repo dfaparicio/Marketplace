@@ -2,8 +2,15 @@ import Categorias from "../models/Categoria.js";
 
 export const crear = async (req, res, next) => {
   try {
+    const { nombre, descripcion } = req.body;
 
-    const { nombre, descripcion, imagen_icono } = req.body;
+    let imagen_icono = null;
+
+        if (req.file) {
+      // req.file.filename contiene el nombre generado por Multer (ej: 167890-123.jpg)
+      // Guardamos la ruta relativa para poder consumirla desde el frontend
+      imagen_icono = `/uploads/productos/${req.file.filename}`;
+    }
 
     const nuevaCategoria = await Categorias.crear({
       nombre,
@@ -58,6 +65,60 @@ export const listar = async (req, res, next) => {
       categoria,
       filtros_aplicados: categoria,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const actualizar = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { nombre, descripcion, imagen_icono } = req.body;
+
+    const categoriaExistente = await Categorias.buscarPorId(id);
+    if (!categoriaExistente) {
+      return res.status(404).json({
+        error: true,
+        mensaje: "Categoria no encontrada",
+      });
+    }
+
+    const datosActualizar = { nombre, descripcion, imagen_icono };
+
+    const categoriaActualizada = await Categorias.actualizar(
+      id,
+      datosActualizar,
+    );
+
+    res.json({
+      error: false,
+      mensaje: "Categoria actualizada correctamente",
+      categoria: categoriaActualizada,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const eliminar = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const categoriaExistente = await Categorias.buscarPorId(id);
+    if (!categoriaExistente) {
+      return res.status(404).json({
+        error: true,
+        mensaje: "Categoria no encontrada",
+      });
+    }
+
+    await Categorias.eliminar(id);
+
+    res.json({
+      error: false,
+      mensaje: "Categoria eliminada exitosamente",
+    })
+
   } catch (error) {
     next(error);
   }
