@@ -12,7 +12,7 @@ export const crear = async (req, res, next) => {
       imagen_icono = `/uploads/productos/${req.file.filename}`;
     }
 
-    const nuevaCategoria = await Categorias.crear({
+    const nuevaCategoria = await Categorias.create({
       nombre,
       descripcion,
       imagen_icono,
@@ -58,12 +58,12 @@ export const listar = async (req, res, next) => {
       limite: req.query.limite,
     };
 
-    const categoria = await Categorias.obtenerTodos(filtros);
+    const categoria = await Categorias.find(filtros);
 
     res.json({
       error: false,
       categoria,
-      filtros_aplicados: categoria,
+      filtros_aplicados: filtros,
     });
   } catch (error) {
     next(error);
@@ -85,9 +85,10 @@ export const actualizar = async (req, res, next) => {
 
     const datosActualizar = { nombre, descripcion, imagen_icono };
 
-    const categoriaActualizada = await Categorias.actualizar(
+    const categoriaActualizada = await Categorias.findByIdAndUpdate(
       id,
       datosActualizar,
+      { new: true }
     );
 
     res.json({
@@ -104,7 +105,7 @@ export const eliminar = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const categoriaExistente = await Categorias.buscarPorId(id);
+    const categoriaExistente = await Categorias.findById(id);
     if (!categoriaExistente) {
       return res.status(404).json({
         error: true,
@@ -112,7 +113,7 @@ export const eliminar = async (req, res, next) => {
       });
     }
 
-    await Categorias.eliminar(id);
+    await Categorias.findByIdAndDelete(id);
 
     res.json({
       error: false,

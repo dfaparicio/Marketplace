@@ -13,7 +13,7 @@ export const crear = async (req, res, next) => {
       imagen_url = `/uploads/productos/${req.file.filename}`;
     }
 
-    const nuevoProducto = await Producto.crear({
+    const nuevoProducto = await Producto.create({
       nombre,
       descripcion,
       precio,
@@ -37,7 +37,7 @@ export const obtener = async (req, res, next) => {
     const producto = await Producto.findById(id);
 
     if (!producto) {
-      return res.json(404).json({
+      return res.status(404).json({
         error: true,
         mensaje: "Producto no encontrado",
       });
@@ -64,7 +64,7 @@ export const listar = async (req, res, next) => {
       limite: req.query.limite,
     };
 
-    const producto = await Producto.obtenerTodos(filtros);
+    const producto = await Producto.find(filtros);
 
     res.json({
       error: false,
@@ -81,17 +81,17 @@ export const actualizar = async (req, res, next) => {
     const { id } = req.params;
     const { nombre, descripcion, precio, stock, imagen_url } = req.body;
 
-    const prodcutoExistente = await Usuario.findById(id);
-    if (!prodcutoExistente) {
+    const productoExistente = await Producto.findById(id);
+    if (!productoExistente) {
       return res.status(404).json({
         error: true,
-        mensaje: "Usuario no encontrado",
+        mensaje: "Producto no encontrado",
       });
     }
 
     const datosActualizar = { nombre, descripcion, precio, stock, imagen_url };
 
-    const productoActualizado = await Producto.actualizar(id, datosActualizar);
+    const productoActualizado = await Producto.findByIdAndUpdate(id, datosActualizar,  { new: true });
 
     res.json({
       error: false,
@@ -107,15 +107,15 @@ export const eliminar = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const productoExistente = await Usuario.findById(id);
+    const productoExistente = await Producto.findById(id);
     if (!productoExistente) {
       return res.status(404).json({
         error: true,
-        mensaje: "Usuario no encontrado",
+        mensaje: "Producto no encontrado",
       });
     }
 
-    await Producto.eliminar(id);
+    await Producto.findByIdAndDelete(id);
     res.json({
       error: false,
       mensaje: "Producto eliminado correctamente",

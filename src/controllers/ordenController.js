@@ -4,7 +4,7 @@ export const crear = async (req, res, next) => {
   try {
     const { total, estado, direccion_envio, notas } = req.body;
 
-    const nuevaOrden = await Orden.crear({
+    const nuevaOrden = await Orden.create({
       total,
       estado,
       direccion_envio,
@@ -27,7 +27,7 @@ export const obtener = async (req, res, next) => {
     const orden = await Orden.findById(id);
 
     if (!orden) {
-      return res.json(404).json({
+      return res.status(404).json({
         error: true,
         mensaje: "Orden no encontrada",
       });
@@ -53,7 +53,7 @@ export const listar = async (req, res, next) => {
       limite: req.query.limite,
     };
 
-    const orden = await Orden.obtenerTodos(filtros);
+    const orden = await Orden.find(filtros);
 
     res.json({
       error: false,

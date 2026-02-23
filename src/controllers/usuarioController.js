@@ -3,10 +3,9 @@ import Usuario from "../models/Usuario.js";
 
 export const crear = async (req, res, next) => {
   try {
-
     const { nombre, email, password, rol } = req.body;
 
-    const usuarioExistente = await Usuario.findOne({email});
+    const usuarioExistente = await Usuario.findOne({ email });
     if (usuarioExistente) {
       return res.status(409).json({
         error: true,
@@ -16,7 +15,7 @@ export const crear = async (req, res, next) => {
 
     const passwordEncriptada = await bcrypt.hash(password, 12);
 
-    const nuevoUsuario = await Usuario.crear({
+    const nuevoUsuario = await Usuario.create({
       nombre,
       email,
       password: passwordEncriptada,
@@ -63,7 +62,7 @@ export const listar = async (req, res, next) => {
       limite: req.query.limite,
     };
 
-    const usuarios = await Usuario.obtenerTodos(filtros);
+    const usuarios = await Usuario.find(filtros);
 
     res.json({
       error: false,
@@ -94,7 +93,11 @@ export const actualizar = async (req, res, next) => {
       datosActualizar.password = await bcrypt.hash(password, 12);
     }
 
-    const usuarioActualizado = await Usuario.actualizar(id, datosActualizar);
+    const usuarioActualizado = await Usuario.findByIdAndUpdate(
+      id,
+      datosActualizar,
+      { new: true },
+    );
 
     res.json({
       error: false,
@@ -118,7 +121,7 @@ export const eliminar = async (req, res, next) => {
       });
     }
 
-    await Usuario.eliminar(id);
+    await Usuario.findByIdAndDelete(id);
 
     res.json({
       error: false,
