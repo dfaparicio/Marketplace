@@ -1,5 +1,5 @@
 import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express"; // Corregido: antes apuntaba a swagger-jsdoc
+import swaggerUi from "swagger-ui-express";
 
 const options = {
   definition: {
@@ -8,10 +8,6 @@ const options = {
       title: "Marketplace Inteligente API",
       version: "1.0.0",
       description: "API completa para marketplace con integración de IA",
-      contact: {
-        name: "Equipo de Desarrollo",
-        email: "dev@marketplace.com",
-      },
     },
     servers: [
       {
@@ -32,71 +28,109 @@ const options = {
           type: "object",
           required: ["nombre", "email", "password"],
           properties: {
-            id: {
-              type: "integer",
-              description: "ID único del usuario",
-              example: 1,
-            },
-            nombre: {
+            _id: {
               type: "string",
-              description: "Nombre completo del usuario",
-              example: "Juan Pérez",
+              description: "ID autogenerado por MongoDB",
+              example: "60d0fe4f5311236168a109ca",
             },
+            nombre: { type: "string", example: "Juan Pérez" },
             email: {
               type: "string",
               format: "email",
-              description: "Email único del usuario",
               example: "juan@ejemplo.com",
+            },
+            password: {
+              type: "string",
+              description: "Contraseña encriptada",
+              example: "********",
             },
             rol: {
               type: "string",
               enum: ["comprador", "vendedor", "admin"],
-              example: "comprador",
+              default: "comprador",
             },
             fecha_registro: { type: "string", format: "date-time" },
           },
         },
         Producto: {
           type: "object",
-          required: ["nombre", "precio", "categoria_id"],
+          required: [
+            "nombre",
+            "descripcion",
+            "precio",
+            "imagen_url",
+            "vendedor_id",
+            "categoria_id",
+          ],
           properties: {
-            id: { type: "integer" },
-            nombre: { type: "string", example: "iPhone 15 Pro" },
-            descripcion: { type: "string" },
-            precio: { type: "number", format: "float", example: 999.99 },
-            stock: { type: "integer", example: 50 },
-            imagen_url: { type: "string" },
-            categoria_id: { type: "integer" },
-            vendedor_id: { type: "integer" },
+            _id: { type: "string", example: "60d0fe4f5311236168a109cb" },
+            nombre: { type: "string", example: "Laptop Gamer" },
+            descripcion: {
+              type: "string",
+              example: "Laptop de alto rendimiento...",
+            },
+            precio: { type: "number", example: 1500.5 },
+            stock: { type: "number", default: 0, example: 10 },
+            imagen_url: {
+              type: "string",
+              example: "https://ejemplo.com/imagen.jpg",
+            },
+            vendedor_id: {
+              type: "string",
+              description: "ID del Usuario vendedor",
+            },
+            categoria_id: { type: "string", description: "ID de la Categoría" },
+            fecha_creacion: { type: "string", format: "date-time" },
           },
         },
-        Error: {
+        Orden: {
           type: "object",
+          required: ["comprador_id", "total"],
           properties: {
-            error: { type: "boolean", example: true },
-            mensaje: {
+            _id: { type: "string", example: "60d0fe4f5311236168a109cc" },
+            comprador_id: {
               type: "string",
-              example: "Mensaje de error descriptivo",
+              description: "ID del Usuario comprador",
             },
-            errores: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  campo: { type: "string" },
-                  mensaje: { type: "string" },
-                },
-              },
+            total: { type: "number", example: 250.99 },
+            estado: {
+              type: "string",
+              enum: [
+                "pendiente",
+                "confirmada",
+                "enviada",
+                "entregada",
+                "cancelada",
+              ],
+              default: "pendiente",
             },
+            direccion_envio: { type: "string", example: "Calle Falsa 123" },
+            notas: { type: "string", example: "Dejar en portería" },
+            fecha_orden: { type: "string", format: "date-time" },
+          },
+        },
+        Categoria: {
+          type: "object",
+          required: ["nombre", "descripcion", "imagen_icono"],
+          properties: {
+            _id: { type: "string", example: "60d0fe4f5311236168a109cd" },
+            nombre: { type: "string", example: "Tecnología" },
+            descripcion: {
+              type: "string",
+              example: "Artículos electrónicos y gadgets",
+            },
+            imagen_icono: {
+              type: "string",
+              example: "https://ejemplo.com/icono_tec.jpg",
+            },
+            fecha_creacion: { type: "string", format: "date-time" },
           },
         },
       },
     },
   },
-  apis: ["./src/routes/*.js"],
+  apis: ["./src/routes/*.js"], // Asegúrate de que esta ruta coincida con tu estructura
 };
-
-export const specs = swaggerJsdoc(options);
 
 export const swaggerOptions = {
   explorer: true,
@@ -104,4 +138,5 @@ export const swaggerOptions = {
   customSiteTitle: "Marketplace API Docs",
 };
 
+export const specs = swaggerJsdoc(options);
 export { swaggerUi };

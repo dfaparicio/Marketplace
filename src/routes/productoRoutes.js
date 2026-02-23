@@ -1,7 +1,7 @@
 import express from "express";
 import { crear, listar, obtener } from "../controllers/productoController.js";
 import {
-  validacionCrearUsuario,
+  validacionCrearProducto,
   validacionParametroId,
 } from "../middlewares/validaciones.js";
 import { validarCampos } from "../middlewares/validarCampos.js";
@@ -9,11 +9,24 @@ import { autenticar, requiereRol } from "../middlewares/auth.js";
 
 const router = express.Router();
 
+// GET /api/productos - Listar productos (Público)
+router.get("/", validarCampos, listar);
 
-router.get("/");
+// GET /api/productos/:id - Obtener producto por ID (Público)
+router.get("/:id", validacionParametroId, validarCampos, obtener);
 
-router.get("/:id");
-
-router.post("/");
+// POST /api/productos - Crear producto (Solo Vendedores)
+router.post(
+  "/",
+  autenticar,
+  requiereRol("vendedor"),
+  validacionCrearProducto,
+  validarCampos,
+  crear,
+);
 
 export default router;
+
+
+
+// CRUD COMPLETO 

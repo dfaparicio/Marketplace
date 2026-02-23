@@ -74,3 +74,57 @@ export const listar = async (req, res, next) => {
     next(error);
   }
 };
+
+export const actualizar = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { nombre, email, password, rol } = req.body;
+
+    const usuarioExistente = await Usuario.buscarPorId(id);
+    if (!usuarioExistente) {
+      return res.status(404).json({
+        error: true,
+        mensaje: "Usuario no encontrado",
+      });
+    }
+
+    const datosActualizar = { nombre, email, rol };
+
+    if (password) {
+      datosActualizar.password = await bcrypt.hash(password, 12);
+    }
+
+    const usuarioActualizado = await Usuario.actualizar(id, datosActualizar);
+
+    res.json({
+      error: false,
+      mensaje: "Usuario actualizado exitosamente",
+      usuario: usuarioActualizado,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const eliminar = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const usuarioExistente = await Usuario.buscarPorId(id);
+    if (!usuarioExistente) {
+      return res.status(404).json({
+        error: true,
+        mensaje: "Usuario no encontrado",
+      });
+    }
+
+    await Usuario.eliminar(id);
+
+    res.json({
+      error: false,
+      mensaje: "Usuario eliminado exitosamente",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
