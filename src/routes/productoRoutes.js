@@ -65,7 +65,7 @@ router.get("/:id", validacionParametroId, validarCampos, obtener);
  *     summary: Crear un nuevo producto (Solo Vendedor)
  *     tags: [Productos]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -104,7 +104,7 @@ router.post(
  *     summary: Actualizar un producto (Solo Vendedor)
  *     tags: [Productos]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -144,7 +144,7 @@ router.put(
  *     summary: Eliminar un producto (Solo Vendedor)
  *     tags: [Productos]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

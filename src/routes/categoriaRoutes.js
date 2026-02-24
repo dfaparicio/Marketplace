@@ -66,7 +66,7 @@ router.get("/:id", validacionParametroId, validarCampos, obtener);
  *     summary: Crear una nueva categoría (Solo Admin)
  *     tags: [Categorias]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -105,7 +105,7 @@ router.post(
  *     summary: Actualizar una categoría (Solo Admin)
  *     tags: [Categorias]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -143,7 +143,7 @@ router.put(
  *     summary: Eliminar una categoría (Solo Admin)
  *     tags: [Categorias]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -20,5 +20,3 @@ Por qué va cuarto: Evita que le pases basura a tu controlador. Intentar buscar 
 
 5. obtener (El trabajo final)
 Qué hace: El controlador principal que va a la base de datos, busca el usuario y lo devuelve.
-
-Por qué va último: Tu controlador ahora puede trabajar con total tranquilidad. Sabe con certeza absoluta que: la persona está logueada, es un administrador, y el ID que mandó tiene el formato correcto.

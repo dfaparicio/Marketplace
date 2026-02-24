@@ -23,7 +23,7 @@ const router = express.Router();
  *     summary: Listar las órdenes del usuario autenticado
  *     tags: [Ordenes]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de órdenes obtenida
@@ -38,7 +38,7 @@ router.get("/", autenticar, validarCampos, listar);
  *     summary: Obtener una orden específica por ID
  *     tags: [Ordenes]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -61,7 +61,7 @@ router.get("/:id", autenticar, validacionParametroId, validarCampos, obtener);
  *     summary: Crear una nueva orden (Solo Comprador)
  *     tags: [Ordenes]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

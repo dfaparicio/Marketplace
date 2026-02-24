@@ -77,7 +77,7 @@ router.post("/login", validacionLogin, validarCampos, login);
  *     summary: Obtener el perfil del usuario autenticado
  *     tags: [Auth]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Datos del perfil del usuario
