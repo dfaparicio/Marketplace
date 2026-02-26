@@ -1,11 +1,10 @@
 import mongoose from "mongoose";
 
-mongoose.set('debug', (collectionName, method, query, doc) => {
-  console.log(`\x1b[36m%s\x1b[0m`, `\n===== MONGOOSE DEBUG =====`);
-  console.log(`📂 Colección: ${collectionName}`);
-  console.log(`🔧 Método: ${method}`);
-  console.log(`🔍 Query:`, JSON.stringify(query, null, 2));
-  console.log(`\x1b[36m%s\x1b[0m`, `==========================\n`);
+mongoose.set('debug', (collectionName, method) => {
+  console.log(
+    `\x1b[32m%s\x1b[0m`,
+    `✅ MongoDB: ${collectionName}.${method} ejecutado correctamente`
+  );
 });
 
 async function conectarMongo() {

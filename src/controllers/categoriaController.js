@@ -2,17 +2,11 @@ import Categorias from "../models/Categoria.js";
 
 export const crear = async (req, res, next) => {
   try {
-
-    console.log("🔥 ARCHIVOS REALES RECIBIDOS:", req.file); 
-    console.log("📝 TEXTO RECIBIDO:", req.body);
-
     const { nombre, descripcion } = req.body;
 
     let imagen_icono = null;
 
-        if (req.file) {
-      // req.file.filename contiene el nombre generado por Multer (ej: 167890-123.jpg)
-      // Guardamos la ruta relativa para poder consumirla desde el frontend
+    if (req.file) {
       imagen_icono = `/uploads/categorias/${req.file.filename}`;
     }
 
@@ -28,6 +22,9 @@ export const crear = async (req, res, next) => {
       categoria: nuevaCategoria,
     });
   } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     next(error);
   }
 };
@@ -55,13 +52,12 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-
     const categorias = await Categorias.find();
 
     res.json({
       error: false,
       total: categorias.length,
-      categorias
+      categorias,
     });
   } catch (error) {
     next(error);
@@ -86,7 +82,7 @@ export const actualizar = async (req, res, next) => {
     const categoriaActualizada = await Categorias.findByIdAndUpdate(
       id,
       datosActualizar,
-      { new: true }
+      { new: true },
     );
 
     res.json({
@@ -116,8 +112,7 @@ export const eliminar = async (req, res, next) => {
     res.json({
       error: false,
       mensaje: "Categoria eliminada exitosamente",
-    })
-
+    });
   } catch (error) {
     next(error);
   }

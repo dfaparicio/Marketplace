@@ -6,7 +6,7 @@ const producto = new mongoose.Schema(
     descripcion: { type: String, required: true },
     precio: { type: Number, required: true, index: true },
     stock: { type: Number, default: 0 },
-    imagen_url: { type: String, required: true },
+    imagen: { type: String, required: false },
     vendedor_id: {
       type: Schema.Types.ObjectId,
       ref: "Usuario",

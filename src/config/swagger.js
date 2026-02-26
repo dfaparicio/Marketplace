@@ -58,7 +58,7 @@ const options = {
             "nombre",
             "descripcion",
             "precio",
-            "imagen_url",
+            "imagen",
             "vendedor_id",
             "categoria_id",
           ],
@@ -71,7 +71,7 @@ const options = {
             },
             precio: { type: "number", example: 1500.5 },
             stock: { type: "number", default: 0, example: 10 },
-            imagen_url: {
+            imagen: {
               type: "string",
               example: "https://ejemplo.com/imagen.jpg",
             },

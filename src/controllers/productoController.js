@@ -2,15 +2,13 @@ import Producto from "../models/Producto.js";
 
 export const crear = async (req, res, next) => {
   try {
-    const { nombre, descripcion, precio, stock } = req.body;
+    const { nombre, descripcion, precio, stock, vendedor_id, categoria_id } =
+      req.body;
 
-    let imagen_url = null;
+    let imagen = null;
 
-    // 2. Verificamos si Multer atrapó un archivo
     if (req.file) {
-      // req.file.filename contiene el nombre generado por Multer (ej: 167890-123.jpg)
-      // Guardamos la ruta relativa para poder consumirla desde el frontend
-      imagen_url = `/uploads/productos/${req.file.filename}`;
+      imagen = `/uploads/productos/${req.file.filename}`;
     }
 
     const nuevoProducto = await Producto.create({
@@ -18,7 +16,9 @@ export const crear = async (req, res, next) => {
       descripcion,
       precio,
       stock,
-      imagen_url,
+      imagen,
+      vendedor_id,
+      categoria_id,
     });
 
     res.status(201).json({
@@ -27,6 +27,9 @@ export const crear = async (req, res, next) => {
       producto: nuevoProducto,
     });
   } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     next(error);
   }
 };
@@ -54,13 +57,12 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-
     const productos = await Producto.find();
 
     res.json({
       error: false,
       total: productos.length,
-      productos
+      productos,
     });
   } catch (error) {
     next(error);
@@ -70,7 +72,7 @@ export const listar = async (req, res, next) => {
 export const actualizar = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { nombre, descripcion, precio, stock, imagen_url } = req.body;
+    const { nombre, descripcion, precio, stock, imagen } = req.body;
 
     const productoExistente = await Producto.findById(id);
     if (!productoExistente) {
@@ -80,9 +82,13 @@ export const actualizar = async (req, res, next) => {
       });
     }
 
-    const datosActualizar = { nombre, descripcion, precio, stock, imagen_url };
+    const datosActualizar = { nombre, descripcion, precio, stock, imagen };
 
-    const productoActualizado = await Producto.findByIdAndUpdate(id, datosActualizar,  { new: true });
+    const productoActualizado = await Producto.findByIdAndUpdate(
+      id,
+      datosActualizar,
+      { new: true },
+    );
 
     res.json({
       error: false,

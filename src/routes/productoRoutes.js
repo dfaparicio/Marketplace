@@ -72,19 +72,41 @@ router.get("/:id", validacionParametroId, validarCampos, obtener);
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - nombre
+ *               - descripcion
+ *               - precio
+ *               - vendedor_id
+ *               - categoria_id
  *             properties:
  *               nombre:
  *                 type: string
+ *                 example: Laptop Gamer
+ *               descripcion:
+ *                 type: string
+ *                 example: RTX 4060 8GB 16GB RAM
  *               precio:
  *                 type: number
- *               categoria:
+ *                 example: 4500
+ *               stock:
+ *                 type: integer
+ *                 example: 10
+ *               vendedor_id:
  *                 type: string
- *               imagen_url:
+ *                 example: 65f2a9e5a3c123456789abcd
+ *               categoria_id:
+ *                 type: string
+ *                 example: 65f2a9e5a3c123456789abce
+ *               imagen:
  *                 type: string
  *                 format: binary
  *     responses:
  *       201:
- *         description: Producto creado
+ *         description: Producto creado exitosamente
+ *       400:
+ *         description: Error de validación
+ *       401:
+ *         description: No autorizado
  */
 router.post(
   "/",

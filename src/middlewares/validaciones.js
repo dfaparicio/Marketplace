@@ -59,10 +59,12 @@ export const validacionCrearProducto = [
     .isInt({ min: 0 })
     .withMessage("El stock debe ser un número entero positivo o cero"),
 
-  body("imagen_url")
-    .trim()
-    .notEmpty()
-    .withMessage("La URL de la imagen es obligatoria"),
+  body().custom((_, { req }) => {
+    if (!req.file) {
+      throw new Error("El ícono/imagen es obligatorio");
+    }
+    return true;
+  }),
 
   body("vendedor_id")
     .isMongoId()
@@ -101,11 +103,11 @@ export const validacionCrearOrden = [
 export const validacionCrearCategoria = [
   body("nombre").notEmpty().withMessage("El nombre es obligatorio"),
   body("descripcion").notEmpty().withMessage("La descripción es obligatoria"),
-  body("imagen_icono").custom((value, { req }) => {
-    if (!req.file && (!req.files || req.files.length === 0)) {
+  body().custom((_, { req }) => {
+    if (!req.file) {
       throw new Error("El ícono/imagen es obligatorio");
     }
-    return true; 
+    return true;
   }),
 ];
 
@@ -148,7 +150,7 @@ export const validacionActualizarProducto = [
     .isInt({ min: 0 })
     .withMessage("El stock debe ser un número entero y no puede ser negativo"),
 
-  body("imagen_url")
+  body("imagen")
     .optional()
     .isURL()
     .withMessage("La imagen debe ser una URL válida"),
