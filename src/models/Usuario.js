@@ -12,12 +12,19 @@ const usuario = new mongoose.Schema(
       enum: ["comprador", "vendedor", "admin"],
       index: true,
     },
+    resetPasswordCode: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
   },
-
   {
     timestamps: {
       createdAt: "fecha_registro",
-      updatedAt: false,
+      updatedAt: "fecha_actualizacion",
     },
   },
 );

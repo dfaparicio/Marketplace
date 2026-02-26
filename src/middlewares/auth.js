@@ -19,7 +19,7 @@ export const autenticar = async (req, res, next) => {
     const token = extraerTokenDeHeader(authHeader);
     const payload = verificarToken(token);
 
-    const usuario = await Usuario.buscarPorId(payload.id);
+    const usuario = await Usuario.findById(payload.id);
 
     if (!usuario) {
       return res.status(401).json({

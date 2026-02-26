@@ -55,19 +55,13 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-    const filtros = {
-      rol: req.query.rol,
-      busqueda: req.query.q,
-      pagina: req.query.pagina,
-      limite: req.query.limite,
-    };
-
-    const usuarios = await Usuario.find(filtros);
+    const usuarios = await Usuario.find().select('-password').lean();;
+    
 
     res.json({
       error: false,
-      usuarios,
-      filtros_aplicados: filtros,
+      total: usuarios.length,
+      usuarios
     });
   } catch (error) {
     next(error);
@@ -126,6 +120,45 @@ export const eliminar = async (req, res, next) => {
     res.json({
       error: false,
       mensaje: "Usuario eliminado exitosamente",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const cambiarContraseña = async (req, res, next) => {
+  try {
+    const { passwordActual, nuevaPassword } = req.body;
+    
+    // El id viene del token JWT que valida la ruta (asumiendo que tu middleware lo inyecta ahí)
+    const usuarioId = req.usuario.id; 
+
+    const usuario = await Usuario.findById(usuarioId);
+
+    if (!usuario) {
+      return res.status(404).json({
+        error: true,
+        mensaje: "Usuario no encontrado.",
+      });
+    }
+
+    // 1. Verificar que la contraseña actual ingresada coincida con la de la DB
+    const passwordValida = await bcrypt.compare(passwordActual, usuario.password);
+    
+    if (!passwordValida) {
+      return res.status(401).json({
+        error: true,
+        mensaje: "La contraseña actual es incorrecta.",
+      });
+    }
+
+    // 2. Hashear y guardar la nueva contraseña
+    usuario.password = await bcrypt.hash(nuevaPassword, 12);
+    await usuario.save();
+
+    res.json({
+      error: false,
+      mensaje: "Contraseña actualizada exitosamente.",
     });
   } catch (error) {
     next(error);

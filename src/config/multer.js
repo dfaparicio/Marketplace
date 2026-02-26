@@ -70,4 +70,7 @@ const upload = multer({
 
 // Exports Nombrados para usar en las rutas
 export const subirImagenProducto = upload.single("imagen_url");
-export const subirIconoCategoria = upload.single("imagen_icono");
+
+
+// export const subirIconoCategoria = upload.single("imagen_icono");
+export const subirIconoCategoria = upload.any();

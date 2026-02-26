@@ -99,22 +99,14 @@ export const validacionCrearOrden = [
 ];
 
 export const validacionCrearCategoria = [
-  body("nombre")
-    .trim()
-    .notEmpty()
-    .withMessage("El nombre de la categoría es obligatorio")
-    .isLength({ min: 2, max: 50 })
-    .withMessage("El nombre debe tener entre 2 y 50 caracteres"),
-
-  body("descripcion")
-    .trim()
-    .notEmpty()
-    .withMessage("La descripción es obligatoria"),
-
-  body("imagen_icono")
-    .trim()
-    .notEmpty()
-    .withMessage("El ícono/imagen es obligatorio"),
+  body("nombre").notEmpty().withMessage("El nombre es obligatorio"),
+  body("descripcion").notEmpty().withMessage("La descripción es obligatoria"),
+  body("imagen_icono").custom((value, { req }) => {
+    if (!req.file && (!req.files || req.files.length === 0)) {
+      throw new Error("El ícono/imagen es obligatorio");
+    }
+    return true; 
+  }),
 ];
 
 export const validacionActualizarUsuario = [
@@ -181,4 +173,72 @@ export const validacionActualizarCategoria = [
     .optional()
     .isString()
     .withMessage("El icono debe ser un texto o ruta válida"),
+];
+
+export const validacionActualizarOrden = [
+  param("id").isMongoId().withMessage("El ID de la orden no es válido"),
+
+  body("total")
+    .optional()
+    .isNumeric()
+    .withMessage("El total debe ser un número válido"),
+
+  body("estado")
+    .optional()
+    .notEmpty()
+    .withMessage("El estado no puede estar vacío")
+    .isString()
+    .withMessage("El estado debe ser un texto"),
+
+  body("direccion_envio")
+    .optional()
+    .notEmpty()
+    .withMessage("La dirección de envío no puede estar vacía")
+    .isString()
+    .withMessage("La dirección de envío debe ser un texto"),
+
+  body("notas")
+    .optional()
+    .isString()
+    .withMessage("Las notas deben ser un texto"),
+];
+
+export const validacionAnularOrden = [
+  param("id").isMongoId().withMessage("El ID de la orden no es válido"),
+];
+
+export const validacionforgotPassword = [
+  body("email")
+    .not()
+    .isEmpty()
+    .withMessage("El email es obligatorio")
+    .isEmail()
+    .withMessage("Debe ser un email válido"),
+];
+
+export const validacionresetPassword = [
+  body("email")
+    .isEmail()
+    .withMessage("El email es obligatorio y debe ser válido"),
+  body("codigo")
+    .not()
+    .isEmpty()
+    .withMessage("El código de recuperación es obligatorio")
+    .isLength({ min: 6, max: 6 })
+    .withMessage("El código debe tener exactamente 6 caracteres")
+    .isNumeric()
+    .withMessage("El código debe ser solo números"),
+  body("nuevaPassword")
+    .isLength({ min: 6 })
+    .withMessage("La nueva contraseña debe tener al menos 6 caracteres"),
+];
+
+export const validacioncambioContraseña = [
+  body("passwordActual")
+    .not()
+    .isEmpty()
+    .withMessage("La contraseña actual es obligatoria"),
+  body("nuevaPassword")
+    .isLength({ min: 6 })
+    .withMessage("La nueva contraseña debe tener al menos 6 caracteres"),
 ];

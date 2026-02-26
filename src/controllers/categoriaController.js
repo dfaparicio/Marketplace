@@ -2,6 +2,10 @@ import Categorias from "../models/Categoria.js";
 
 export const crear = async (req, res, next) => {
   try {
+
+    console.log("🔥 ARCHIVOS REALES RECIBIDOS:", req.file); 
+    console.log("📝 TEXTO RECIBIDO:", req.body);
+
     const { nombre, descripcion } = req.body;
 
     let imagen_icono = null;
@@ -9,7 +13,7 @@ export const crear = async (req, res, next) => {
         if (req.file) {
       // req.file.filename contiene el nombre generado por Multer (ej: 167890-123.jpg)
       // Guardamos la ruta relativa para poder consumirla desde el frontend
-      imagen_icono = `/uploads/productos/${req.file.filename}`;
+      imagen_icono = `/uploads/categorias/${req.file.filename}`;
     }
 
     const nuevaCategoria = await Categorias.create({
@@ -51,19 +55,13 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-    const filtros = {
-      nombre: req.query.nombre,
-      busqueda: req.query.q,
-      pagina: req.query.pagina,
-      limite: req.query.limite,
-    };
 
-    const categoria = await Categorias.find(filtros);
+    const categorias = await Categorias.find();
 
     res.json({
       error: false,
-      categoria,
-      filtros_aplicados: filtros,
+      total: categorias.length,
+      categorias
     });
   } catch (error) {
     next(error);

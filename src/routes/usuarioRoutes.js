@@ -5,11 +5,13 @@ import {
   obtener,
   actualizar,
   eliminar,
+  cambiarContraseña,
 } from "../controllers/usuarioController.js";
 import {
   validacionCrearUsuario,
   validacionParametroId,
   validacionActualizarUsuario,
+  validacioncambioContraseña,
 } from "../middlewares/validaciones.js";
 import { validarCampos } from "../middlewares/validarCampos.js";
 import { autenticar, requiereRol } from "../middlewares/auth.js";
@@ -182,6 +184,49 @@ router.delete(
   validacionParametroId,
   validarCampos,
   eliminar,
+);
+
+
+/**
+ * @swagger
+ * /api/usuarios/update-password:
+ *   put:
+ *     summary: Cambia la contraseña del usuario autenticado
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - passwordActual
+ *               - nuevaPassword
+ *             properties:
+ *               passwordActual:
+ *                 type: string
+ *                 format: password
+ *                 example: "MiClaveActual123"
+ *               nuevaPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: "MiNuevaClave456"
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada exitosamente
+ *       401:
+ *         description: No autorizado o contraseña actual incorrecta
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.put(
+  '/update-password',
+  autenticar,
+  validacioncambioContraseña,
+  validarCampos,
+  cambiarContraseña
 );
 
 export default router;

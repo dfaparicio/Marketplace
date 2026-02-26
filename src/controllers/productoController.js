@@ -54,22 +54,13 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-    const filtros = {
-      busqueda: req.query.q,
-      categoria_id: req.query.cat,
-      precio_min: req.query.min,
-      precio_max: req.query.max,
-      vendedor_id: req.query.vendedor,
-      pagina: req.query.pagina,
-      limite: req.query.limite,
-    };
 
-    const producto = await Producto.find(filtros);
+    const productos = await Producto.find();
 
     res.json({
       error: false,
-      producto,
-      filtros_aplicados: filtros,
+      total: productos.length,
+      productos
     });
   } catch (error) {
     next(error);

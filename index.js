@@ -17,6 +17,18 @@ import authRoutes from "./src/routes/authRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware para ver los datos de respuesta en la consola
+app.use((req, res, next) => {
+  const oldJson = res.json;
+  res.json = function (data) {
+    console.log(`\x1b[33m%s\x1b[0m`, `\n===== RESPUESTA API (${req.method} ${req.url}) =====`);
+    console.dir(data, { depth: null, colors: true }); // Muestra el JSON con colores y sin límites
+    console.log(`\x1b[33m%s\x1b[0m`, `=============================================\n`);
+    return oldJson.call(this, data);
+  };
+  next();
+});
+
 // Conexión a Base de Datos
 conectarMongo();
 

@@ -44,21 +44,86 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-    const filtros = {
-      comprador_id: req.query.comprador,
-      estado: req.query.estado,
-      total_min: req.query.min,
-      total_max: req.query.max,
-      pagina: req.query.pagina,
-      limite: req.query.limite,
-    };
 
-    const orden = await Orden.find(filtros);
+    const ordenes = await Orden.find(filtros);
 
     res.json({
       error: false,
-      orden,
-      filtros_aplicados: orden,
+      total: ordenes.lenght,
+      ordenes
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const actualizar = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { total, estado, direccion_envio, notas } = req.body;
+
+    const ordenExistente = await Orden.findById(id);
+    if (!ordenExistente) {
+      return res.status(404).json({
+        error: true,
+        mensaje: "Orden no encontrada",
+      });
+    }
+
+    if (ordenExistente.estado !== "pendiente") {
+      return res.status(400).json({
+        error: true,
+        mensaje: "Solo se puede actualizar una orden si su estado es pendiente",
+      });
+    }
+
+    const datosActualizar = { total, estado, direccion_envio, notas };
+
+    const ordenActualizada = await Orden.findByIdAndUpdate(
+      id,
+      datosActualizar,
+      { new: true },
+    );
+
+    res.json({
+      error: false,
+      mensaje: "Orden actualizada correctamente",
+      orden: ordenActualizada,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const anular = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const ordenExistente = await Orden.findById(id);
+    if (!ordenExistente) {
+      return res.status(404).json({
+        error: true,
+        mensaje: "Orden no encontrada",
+      });
+    }
+
+    if (ordenExistente.estado !== "pendiente") {
+      return res.status(400).json({
+        error: true,
+        mensaje: "Solo se puede anular una orden si su estado es pendiente",
+      });
+    }
+
+    const datosActualizar = { estado: "cancelada" };
+
+    const ordenAnulada = await Orden.findByIdAndUpdate(id, datosActualizar, {
+      new: true,
+    });
+
+    res.json({
+      error: false,
+      mensaje: "Orden anulada correctamente",
+      orden: ordenAnulada,
     });
   } catch (error) {
     next(error);

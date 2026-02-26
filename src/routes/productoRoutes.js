@@ -79,7 +79,7 @@ router.get("/:id", validacionParametroId, validarCampos, obtener);
  *                 type: number
  *               categoria:
  *                 type: string
- *               imagen:
+ *               imagen_url:
  *                 type: string
  *                 format: binary
  *     responses:

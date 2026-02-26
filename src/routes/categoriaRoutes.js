@@ -76,7 +76,9 @@ router.get("/:id", validacionParametroId, validarCampos, obtener);
  *             properties:
  *               nombre:
  *                 type: string
- *               icono:
+ *               descripcion:
+ *                 type: string
+ *               imagen_icono:
  *                 type: string
  *                 format: binary
  *     responses:
@@ -92,8 +94,8 @@ router.post(
   "/",
   autenticar,
   requiereRol("admin"),
+    subirIconoCategoria,
   validacionCrearCategoria,
-  subirIconoCategoria,
   validarCampos,
   crear,
 );
