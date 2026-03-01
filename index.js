@@ -7,6 +7,8 @@ import "dotenv/config";
 import { specs, swaggerUi, swaggerOptions } from "./src/config/swagger.js";
 import { conectarMongo } from "./src/config/database.js";
 
+
+
 // Aquí irían tus imports de rutas, por ejemplo:
 import usuarioRoutes from "./src/routes/usuarioRoutes.js";
 import productoRoutes from "./src/routes/productoRoutes.js";
@@ -20,21 +22,56 @@ const PORT = process.env.PORT || 3000;
 // Middleware para ver los datos de respuesta en la consola
 app.use((req, res, next) => {
   const oldJson = res.json;
+  const start = Date.now();
+
   res.json = function (data) {
-    console.log(`\x1b[33m%s\x1b[0m`, `\n===== RESPUESTA API (${req.method} ${req.url}) =====`);
-    console.dir(data, { depth: null, colors: true }); // Muestra el JSON con colores y sin límites
-    console.log(`\x1b[33m%s\x1b[0m`, `=============================================\n`);
+    const duration = Date.now() - start;
+
+    const methodColors = {
+      GET: "\x1b[36m", // Cyan
+      POST: "\x1b[32m", // Green
+      PUT: "\x1b[33m", // Yellow
+      PATCH: "\x1b[35m", // Magenta
+      DELETE: "\x1b[31m", // Red
+    };
+
+    const reset = "\x1b[0m";
+    const methodColor = methodColors[req.method] || "\x1b[37m";
+
+    console.log(
+      "\n\x1b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m",
+    );
+    console.log(`🕒 ${new Date().toISOString()}`);
+
+    console.log(
+      `${methodColor}${req.method}${reset} ${req.originalUrl}  ` +
+        `\x1b[34m${res.statusCode}\x1b[0m  ` +
+        `⏱ ${duration}ms`,
+    );
+
+    console.log("\n📦 Response Body:");
+    console.log(JSON.stringify(data, null, 2));
+
+    console.log(
+      "\x1b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m\n",
+    );
+
     return oldJson.call(this, data);
   };
+
   next();
 });
 
 // Conexión a Base de Datos
 conectarMongo();
 
-
 // Middlewares globales
-app.use(helmet()); // Protege encabezados HTTP
+app.use(
+  helmet({
+    contentSecurityPolicy:
+      process.env.NODE_ENV === "production" ? undefined : false,
+  }),
+);
 app.use(cors());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "10mb" }));

@@ -1,4 +1,4 @@
-import mongoose, { Schema }from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const orden = new mongoose.Schema(
   {
@@ -8,14 +8,45 @@ const orden = new mongoose.Schema(
       required: true,
       index: true,
     },
-    total: { type: Number, required: true },
+    productos: [
+      {
+        producto_id: {
+          type: Schema.Types.ObjectId,
+          ref: "Producto",
+          required: true,
+          index: true,
+        },
+        cantidad: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        precio_unitario: {
+          type: Number,
+          required: true,
+        },
+        subtotal: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    total: {
+      type: Number,
+      required: true,
+    },
     estado: {
       type: String,
       default: "pendiente",
       enum: ["pendiente", "confirmada", "enviada", "entregada", "cancelada"],
+      index: true,
     },
-    direccion_envio: { type: String },
-    notas: { type: String },
+    direccion_envio: {
+      type: String,
+    },
+    notas: {
+      type: String,
+    },
   },
   {
     timestamps: {
@@ -24,5 +55,7 @@ const orden = new mongoose.Schema(
     },
   },
 );
+
+orden.index({ fecha_orden: -1 });
 
 export default mongoose.model("Orden", orden);

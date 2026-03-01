@@ -1,4 +1,5 @@
-import Categorias from "../models/Categoria.js";
+import Categoria from "../models/Categoria.js";
+import { construirFiltrosMongo, parsearOrdenamiento } from '../utils/filtros.js';
 
 export const crear = async (req, res, next) => {
   try {
@@ -7,10 +8,10 @@ export const crear = async (req, res, next) => {
     let imagen_icono = null;
 
     if (req.file) {
-      imagen_icono = `/uploads/categorias/${req.file.filename}`;
+      imagen_icono = `/uploads/Categorias/${req.file.filename}`;
     }
 
-    const nuevaCategoria = await Categorias.create({
+    const nuevaCategoria = await Categoria.create({
       nombre,
       descripcion,
       imagen_icono,
@@ -19,7 +20,7 @@ export const crear = async (req, res, next) => {
     res.status(201).json({
       error: false,
       memsaje: "Categoria creada exitosamente",
-      categoria: nuevaCategoria,
+      Categoria: nuevaCategoria,
     });
   } catch (error) {
     if (req.file && fs.existsSync(req.file.path)) {
@@ -32,9 +33,9 @@ export const crear = async (req, res, next) => {
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const categorias = await Categorias.findById(id);
+    const Categoria = await Categoria.findById(id);
 
-    if (!categorias) {
+    if (!Categoria) {
       return res.status(404).json({
         error: true,
         mensaje: "Categoria no encontrada",
@@ -43,7 +44,7 @@ export const obtener = async (req, res, next) => {
 
     res.json({
       error: false,
-      categorias,
+      Categoria,
     });
   } catch (error) {
     next(error);
@@ -52,12 +53,29 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-    const categorias = await Categorias.find();
+    const rawFiltros = { busqueda: req.query.q };
+    
+    const queryMongo = construirFiltrosMongo(rawFiltros, ["nombre", "descripcion"]);
+    const sortMongo = parsearOrdenamiento(req.query.orden);
+
+    const limite = parseInt(req.query.limite) || 10;
+    const pagina = parseInt(req.query.pagina) || 1;
+    const skip = (pagina - 1) * limite;
+
+    const [Categoria, total] = await Promise.all([
+      Categoria.find(queryMongo).sort(sortMongo).skip(skip).limit(limite),
+      Categoria.countDocuments(queryMongo)
+    ]);
 
     res.json({
       error: false,
-      total: categorias.length,
-      categorias,
+      metadata: { 
+        total, 
+        pagina_actual: pagina, 
+        paginas_totales: Math.ceil(total / limite),
+        limite 
+      },
+      Categoria
     });
   } catch (error) {
     next(error);
@@ -69,8 +87,8 @@ export const actualizar = async (req, res, next) => {
     const { id } = req.params;
     const { nombre, descripcion, imagen_icono } = req.body;
 
-    const categoriaExistente = await Categorias.findById(id);
-    if (!categoriaExistente) {
+    const CategoriaExistente = await Categoria.findById(id);
+    if (!CategoriaExistente) {
       return res.status(404).json({
         error: true,
         mensaje: "Categoria no encontrada",
@@ -79,7 +97,7 @@ export const actualizar = async (req, res, next) => {
 
     const datosActualizar = { nombre, descripcion, imagen_icono };
 
-    const categoriaActualizada = await Categorias.findByIdAndUpdate(
+    const CategoriaActualizada = await Categoria.findByIdAndUpdate(
       id,
       datosActualizar,
       { new: true },
@@ -88,7 +106,7 @@ export const actualizar = async (req, res, next) => {
     res.json({
       error: false,
       mensaje: "Categoria actualizada correctamente",
-      categoria: categoriaActualizada,
+      Categoria: CategoriaActualizada,
     });
   } catch (error) {
     next(error);
@@ -99,15 +117,15 @@ export const eliminar = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const categoriaExistente = await Categorias.findById(id);
-    if (!categoriaExistente) {
+    const CategoriaExistente = await Categoria.findById(id);
+    if (!CategoriaExistente) {
       return res.status(404).json({
         error: true,
         mensaje: "Categoria no encontrada",
       });
     }
 
-    await Categorias.findByIdAndDelete(id);
+    await Categoria.findByIdAndDelete(id);
 
     res.json({
       error: false,

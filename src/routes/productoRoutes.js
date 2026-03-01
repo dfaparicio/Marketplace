@@ -10,6 +10,7 @@ import {
   validacionCrearProducto,
   validacionParametroId,
   validacionActualizarProducto,
+  validacionesFiltros,
 } from "../middlewares/validaciones.js";
 import { validarCampos } from "../middlewares/validarCampos.js";
 import { autenticar, requiereRol } from "../middlewares/auth.js";
@@ -28,13 +29,51 @@ const router = express.Router();
  * @swagger
  * /api/productos:
  *   get:
- *     summary: Listar todos los productos
- *     tags: [Productos]
+ *     summary: Listar todos los productos con filtros avanzados
+ *     tags:
+ *       - Productos
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Buscar en nombre y descripción
+ *       - in: query
+ *         name: categorias
+ *         schema:
+ *           type: string
+ *         description: IDs de categorías separados por coma
+ *       - in: query
+ *         name: precio_min
+ *         schema:
+ *           type: number
+ *         description: Precio mínimo
+ *       - in: query
+ *         name: precio_max
+ *         schema:
+ *           type: number
+ *         description: Precio máximo
+ *       - in: query
+ *         name: orden
+ *         schema:
+ *           type: string
+ *           example: "precio:asc,createdAt:desc"
+ *         description: Ordenamiento de los productos
+ *       - in: query
+ *         name: pagina
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limite
+ *         schema:
+ *           type: integer
+ *           default: 10
  *     responses:
  *       200:
  *         description: Lista de productos obtenida exitosamente
  */
-router.get("/", validarCampos, listar);
+router.get("/", validacionesFiltros, validarCampos, listar);
 
 
 /**

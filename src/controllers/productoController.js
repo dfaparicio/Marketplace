@@ -1,4 +1,5 @@
 import Producto from "../models/Producto.js";
+import { construirFiltrosMongo, parsearOrdenamiento, parsearLista } from '../utils/filtros.js';
 
 export const crear = async (req, res, next) => {
   try {
@@ -57,11 +58,41 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-    const productos = await Producto.find();
+    // 1. Armar filtros crudos
+    const rawFiltros = {
+      categorias: parsearLista(req.query.categorias), 
+      precio: {
+        min: req.query.precio_min ? parseFloat(req.query.precio_min) : undefined,
+        max: req.query.precio_max ? parseFloat(req.query.precio_max) : undefined,
+      },
+      vendedor_id: req.query.vendedor,
+      busqueda: req.query.q,
+    };
 
+    // 2. Procesar filtros para Mongo (le decimos que busque en nombre y descripcion)
+    const queryMongo = construirFiltrosMongo(rawFiltros, ["nombre", "descripcion"]);
+    const sortMongo = parsearOrdenamiento(req.query.orden);
+
+    // 3. Configurar Paginación
+    const limite = parseInt(req.query.limite) || 10;
+    const pagina = parseInt(req.query.pagina) || 1;
+    const skip = (pagina - 1) * limite;
+
+    // 4. Ejecutar consulta (Usamos populate para traer los datos del vendedor y categoría)
+    const [productos, total] = await Promise.all([
+      Producto.find(queryMongo)
+        .sort(sortMongo)
+        .skip(skip)
+        .limit(limite)
+        .populate('vendedor_id', 'nombre email') // Opcional: Trae info del vendedor
+        .populate('categoria_id', 'nombre'),     // Opcional: Trae info de la categoría
+      Producto.countDocuments(queryMongo)
+    ]);
+
+    // 5. Devolver con metadatos
     res.json({
       error: false,
-      total: productos.length,
+      metadata: { total, pagina_actual: pagina, paginas_totales: Math.ceil(total / limite), limite },
       productos,
     });
   } catch (error) {

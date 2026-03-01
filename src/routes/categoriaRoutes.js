@@ -10,6 +10,7 @@ import {
   validacionCrearCategoria,
   validacionParametroId,
   validacionActualizarCategoria,
+  validacionesFiltros
 } from "../middlewares/validaciones.js";
 import { validarCampos } from "../middlewares/validarCampos.js";
 import { autenticar, requiereRol } from "../middlewares/auth.js";
@@ -29,13 +30,34 @@ const router = express.Router();
  * /api/categorias:
  *   get:
  *     summary: Listar todas las categorías
- *     tags: [Categorias]
+ *     tags:
+ *       - Categorias
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Búsqueda por nombre o descripción de categoría
+ *       - in: query
+ *         name: orden
+ *         schema:
+ *           type: string
+ *           example: "nombre:asc"
+ *       - in: query
+ *         name: pagina
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limite
+ *         schema:
+ *           type: integer
+ *           default: 10
  *     responses:
  *       200:
  *         description: Lista de categorías obtenida exitosamente
  */
-// GET /api/categorias - Listar categorías (Público)
-router.get("/", validarCampos, listar);
+router.get("/", validacionesFiltros, validarCampos, listar);
 
 /**
  * @swagger

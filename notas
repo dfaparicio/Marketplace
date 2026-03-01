@@ -1,0 +1,77 @@
+/**
+ * @swagger
+ * /api/usuarios:
+ *   get:
+ *     summary: Lista todos los usuarios
+ *     description: Obtiene todos los usuarios registrados. Requiere rol administrador.
+ *     tags:
+ *       - Usuarios
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Usuario'
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: No tiene permisos de administrador
+ */
+router.get(
+  "/",
+  autenticar,
+  requiereRol("admin"),
+  validarCampos,
+  listar
+);
+
+
+/**
+ * @swagger
+ * /api/productos:
+ *   get:
+ *     summary: Listar todos los productos
+ *     tags: [Productos]
+ *     responses:
+ *       200:
+ *         description: Lista de productos obtenida exitosamente
+ */
+router.get("/", validarCampos, listar);
+
+
+
+
+/**
+ * @swagger
+ * /api/ordenes:
+ *   get:
+ *     summary: Listar las órdenes del usuario autenticado
+ *     tags: [Ordenes]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de órdenes obtenida
+ */
+router.get("/", autenticar, validarCampos, listar);
+
+
+
+/**
+ * @swagger
+ * /api/categorias:
+ *   get:
+ *     summary: Listar todas las categorías
+ *     tags: [Categorias]
+ *     responses:
+ *       200:
+ *         description: Lista de categorías obtenida exitosamente
+ */
+// GET /api/categorias - Listar categorías (Público)
+router.get("/", validarCampos, listar);
+

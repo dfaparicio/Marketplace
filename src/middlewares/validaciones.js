@@ -1,4 +1,4 @@
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 
 export const validacionParametroId = [
   param("id")
@@ -76,9 +76,25 @@ export const validacionCrearProducto = [
 ];
 
 export const validacionCrearOrden = [
-  body("comprador_id")
+  body("productos")
+    .isArray({ min: 1 })
+    .withMessage("La orden debe incluir al menos un producto"),
+
+  body("productos.*.producto_id")
     .isMongoId()
-    .withMessage("El ID del comprador no es un formato válido de MongoDB"),
+    .withMessage("El ID del producto no es un formato válido"),
+
+  body("productos.*.cantidad")
+    .isInt({ min: 1 })
+    .withMessage("La cantidad debe ser un número entero mayor a 0"),
+
+  body("productos.*.precio_unitario")
+    .isNumeric()
+    .withMessage("El precio unitario debe ser numérico"),
+
+  body("productos.*.subtotal")
+    .isNumeric()
+    .withMessage("El subtotal debe ser numérico"),
 
   body("total")
     .isNumeric()
@@ -189,8 +205,8 @@ export const validacionActualizarOrden = [
     .optional()
     .notEmpty()
     .withMessage("El estado no puede estar vacío")
-    .isString()
-    .withMessage("El estado debe ser un texto"),
+    .isIn(["pendiente", "confirmada", "enviada", "entregada", "cancelada"])
+    .withMessage("Estado de orden no válido"),
 
   body("direccion_envio")
     .optional()
@@ -243,4 +259,41 @@ export const validacioncambioContraseña = [
   body("nuevaPassword")
     .isLength({ min: 6 })
     .withMessage("La nueva contraseña debe tener al menos 6 caracteres"),
+];
+
+export const validacionesFiltros = [
+  query("pagina")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("La página debe ser un número mayor a 0")
+    .toInt(),
+  query("limite")
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage("El límite debe ser entre 1 y 100")
+    .toInt(),
+
+  query("q").optional().trim().escape(),
+
+  query("precio_min")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("El precio mínimo no puede ser negativo")
+    .toFloat(),
+  query("precio_max")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("El precio máximo no puede ser negativo")
+    .custom((value, { req }) => {
+      if (req.query.precio_min && value < req.query.precio_min) {
+        throw new Error("El precio máximo debe ser mayor al mínimo");
+      }
+      return true;
+    })
+    .toFloat(),
+
+  query("rol")
+    .optional()
+    .isIn(["comprador", "vendedor", "admin"])
+    .withMessage("Rol no válido"),
 ];

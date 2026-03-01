@@ -20,3 +20,8 @@ Por qué va cuarto: Evita que le pases basura a tu controlador. Intentar buscar 
 
 5. obtener (El trabajo final)
 Qué hace: El controlador principal que va a la base de datos, busca el usuario y lo devuelve.
+
+
+
+Api123456789 ( ADMIN, COMPRADOR, VENDEDOR )
+New123456789 ( CORREO PRUEBA CONTRASEÑAS)

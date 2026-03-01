@@ -1,5 +1,6 @@
-// Parsea una cadena separada por comas en una lista de tipos específicos
+// src/utils/filtros.js
 
+// 1. Parsea listas separadas por comas (se queda igual)
 export const parsearLista = (valor, tipo = "string") => {
   if (!valor) return null;
   const lista = valor
@@ -13,69 +14,58 @@ export const parsearLista = (valor, tipo = "string") => {
     case "float":
       return lista.map((item) => parseFloat(item)).filter((num) => !isNaN(num));
     default:
-      return lista;
+      return lista; // Para ObjectIds de Mongo, usamos string, Mongoose lo convierte solo
   }
 };
 
-// Parsea el parámetro de ordenamiento (ej: "precio:asc,nombre:desc")
-
+// 2. Parsea el ordenamiento (Convertido a formato Mongo: { campo: 1 o -1 })
 export const parsearOrdenamiento = (orden) => {
-  if (!orden) return [];
-  const camposPermitidos = [
-    "precio",
-    "fecha_creacion",
-    "nombre",
-    "stock",
-    "id",
-  ];
+  if (!orden) return { createdAt: -1 }; // Por defecto: más recientes primero
 
-  return orden
-    .split(",")
-    .map((item) => {
-      const [campo, direccion = "desc"] = item.trim().split(":");
-      return {
-        campo: campo.toLowerCase(),
-        direccion: direccion.toUpperCase(),
-      };
-    })
-    .filter(
-      (item) =>
-        camposPermitidos.includes(item.campo) &&
-        ["ASC", "DESC"].includes(item.direccion),
-    );
+  const sortQuery = {};
+  orden.split(",").forEach((item) => {
+    const [campo, direccion = "desc"] = item.trim().split(":");
+    // Normalizamos "id" a "_id" para Mongo
+    const campoMongo =
+      campo.toLowerCase() === "id" ? "_id" : campo.toLowerCase();
+    sortQuery[campoMongo] = direccion.toLowerCase() === "asc" ? 1 : -1;
+  });
+
+  return sortQuery;
 };
 
-// Construye dinámicamente la cláusula WHERE y sus parámetros para SQL
+// 3. Construye el objeto Query de MongoDB dinámicamente
+// "camposRegex" es un array con los campos donde queremos que busque si envían "q"
+export const construirFiltrosMongo = (filtros, camposRegex = []) => {
+  const query = {};
 
-export const construirFiltrosSQL = (filtros) => {
-  const condiciones = [];
-  const parametros = [];
-
+  // Filtro de Categorías ($in)
   if (filtros.categorias && filtros.categorias.length > 0) {
-    const placeholders = filtros.categorias.map(() => "?").join(",");
-    condiciones.push(`p.categoria_id IN (${placeholders})`);
-    parametros.push(...filtros.categorias);
+    query.categoria_id = { $in: filtros.categorias };
   }
 
+  // Filtro de Rol o Estado (Match exacto)
+  if (filtros.rol) query.rol = filtros.rol;
+  if (filtros.estado) query.estado = filtros.estado;
+  if (filtros.vendedor_id) query.vendedor_id = filtros.vendedor_id;
+  if (filtros.comprador_id) query.comprador_id = filtros.comprador_id;
+
+  // Filtro de Precio ($gte y $lte)
   if (filtros.precio) {
-    if (filtros.precio.min !== undefined) {
-      condiciones.push("p.precio >= ?");
-      parametros.push(filtros.precio.min);
-    }
-    if (filtros.precio.max !== undefined) {
-      condiciones.push("p.precio <= ?");
-      parametros.push(filtros.precio.max);
-    }
+    query.precio = {};
+    if (filtros.precio.min !== undefined)
+      query.precio.$gte = filtros.precio.min;
+    if (filtros.precio.max !== undefined)
+      query.precio.$lte = filtros.precio.max;
+    if (Object.keys(query.precio).length === 0) delete query.precio;
   }
 
-  if (filtros.busqueda) {
-    condiciones.push("(p.nombre LIKE ? OR p.descripcion LIKE ?)");
-    parametros.push(`%${filtros.busqueda}%`, `%${filtros.busqueda}%`);
+  // Filtro de Búsqueda General ($or + $regex)
+  if (filtros.busqueda && camposRegex.length > 0) {
+    query.$or = camposRegex.map((campo) => ({
+      [campo]: { $regex: filtros.busqueda, $options: "i" }, // "i" = case-insensitive
+    }));
   }
 
-  return {
-    whereClause:
-      condiciones.length > 0 ? `AND ${condiciones.join(" AND ")}` : "",
-    parametros,
-  };
+  return query;
 };

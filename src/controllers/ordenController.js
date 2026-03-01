@@ -1,10 +1,14 @@
 import Orden from "../models/Orden.js";
+import { construirFiltrosMongo, parsearOrdenamiento } from '../utils/filtros.js';
 
 export const crear = async (req, res, next) => {
   try {
-    const { total, estado, direccion_envio, notas } = req.body;
+    const { productos, total, estado, direccion_envio, notas } = req.body;
+    const comprador_id = req.usuario.id;
 
     const nuevaOrden = await Orden.create({
+      comprador_id,
+      productos,
       total,
       estado,
       direccion_envio,
@@ -24,6 +28,7 @@ export const crear = async (req, res, next) => {
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
+
     const orden = await Orden.findById(id);
 
     if (!orden) {
@@ -44,14 +49,23 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
+    const rawFiltros = {
+      estado: req.query.estado,
+      comprador_id: req.query.comprador,
+    };
 
-    const ordenes = await Orden.find(filtros);
+    const queryMongo = construirFiltrosMongo(rawFiltros);
+    const sortMongo = parsearOrdenamiento(req.query.orden);
 
-    res.json({
-      error: false,
-      total: ordenes.lenght,
-      ordenes
-    });
+    const limite = parseInt(req.query.limite) || 10;
+    const skip = ((parseInt(req.query.pagina) || 1) - 1) * limite;
+
+    const [ordenes, total] = await Promise.all([
+      Orden.find(queryMongo).sort(sortMongo).skip(skip).limit(limite).populate('comprador_id', 'nombre email'),
+      Orden.countDocuments(queryMongo)
+    ]);
+
+    res.json({ error: false, metadata: { total }, ordenes });
   } catch (error) {
     next(error);
   }
@@ -60,7 +74,7 @@ export const listar = async (req, res, next) => {
 export const actualizar = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { total, estado, direccion_envio, notas } = req.body;
+    const { estado, direccion_envio, notas } = req.body;
 
     const ordenExistente = await Orden.findById(id);
     if (!ordenExistente) {
@@ -77,7 +91,7 @@ export const actualizar = async (req, res, next) => {
       });
     }
 
-    const datosActualizar = { total, estado, direccion_envio, notas };
+    const datosActualizar = { estado, direccion_envio, notas };
 
     const ordenActualizada = await Orden.findByIdAndUpdate(
       id,

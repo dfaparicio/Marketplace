@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import Usuario from "../models/Usuario.js";
+import { construirFiltrosMongo, parsearOrdenamiento } from '../utils/filtros.js';
 
 export const crear = async (req, res, next) => {
   try {
@@ -55,12 +56,27 @@ export const obtener = async (req, res, next) => {
 
 export const listar = async (req, res, next) => {
   try {
-    const usuarios = await Usuario.find().select('-password').lean();;
-    
+    const rawFiltros = {
+      rol: req.query.rol,
+      busqueda: req.query.q,
+    };
+
+    // Que busque por nombre o email
+    const queryMongo = construirFiltrosMongo(rawFiltros, ["nombre", "email"]);
+    const sortMongo = parsearOrdenamiento(req.query.orden);
+
+    const limite = parseInt(req.query.limite) || 10;
+    const pagina = parseInt(req.query.pagina) || 1;
+    const skip = (pagina - 1) * limite;
+
+    const [usuarios, total] = await Promise.all([
+      Usuario.find(queryMongo).select('-password').lean().sort(sortMongo).skip(skip).limit(limite),
+      Usuario.countDocuments(queryMongo)
+    ]);
 
     res.json({
       error: false,
-      total: usuarios.length,
+      metadata: { total, pagina_actual: pagina, paginas_totales: Math.ceil(total / limite) },
       usuarios
     });
   } catch (error) {
@@ -133,7 +149,7 @@ export const cambiarContraseña = async (req, res, next) => {
     // El id viene del token JWT que valida la ruta (asumiendo que tu middleware lo inyecta ahí)
     const usuarioId = req.usuario.id; 
 
-    const usuario = await Usuario.findById(usuarioId);
+    const usuario = await Usuario.findById(usuarioId).select('+password');
 
     if (!usuario) {
       return res.status(404).json({
