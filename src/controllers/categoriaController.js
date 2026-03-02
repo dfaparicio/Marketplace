@@ -1,6 +1,11 @@
 import Categoria from "../models/Categoria.js";
-import { construirFiltrosMongo, parsearOrdenamiento } from '../utils/filtros.js';
+import fs from "fs";
+import {
+  construirFiltrosMongo,
+  parsearOrdenamiento,
+} from "../utils/filtros.js";
 
+// Crear categoria
 export const crear = async (req, res, next) => {
   try {
     const { nombre, descripcion } = req.body;
@@ -30,12 +35,13 @@ export const crear = async (req, res, next) => {
   }
 };
 
+// Buscar categoria por id
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const Categoria = await Categoria.findById(id);
+    const categoria = await Categoria.findById(id);
 
-    if (!Categoria) {
+    if (!categoria) {
       return res.status(404).json({
         error: true,
         mensaje: "Categoria no encontrada",
@@ -44,44 +50,52 @@ export const obtener = async (req, res, next) => {
 
     res.json({
       error: false,
-      Categoria,
+      categoria,
     });
   } catch (error) {
     next(error);
   }
 };
 
+// Listar categorias degun filtros 
 export const listar = async (req, res, next) => {
   try {
-    const rawFiltros = { busqueda: req.query.q };
-    
-    const queryMongo = construirFiltrosMongo(rawFiltros, ["nombre", "descripcion"]);
-    const sortMongo = parsearOrdenamiento(req.query.orden);
+    const { q, orden, limite = 10, pagina = 1 } = req.query;
 
-    const limite = parseInt(req.query.limite) || 10;
-    const pagina = parseInt(req.query.pagina) || 1;
-    const skip = (pagina - 1) * limite;
+    // Si no hay busqueda, nos trae todos
+    const rawFiltros = q ? { busqueda: q } : {};
 
-    const [Categoria, total] = await Promise.all([
-      Categoria.find(queryMongo).sort(sortMongo).skip(skip).limit(limite),
-      Categoria.countDocuments(queryMongo)
+    const queryMongo = q
+      ? construirFiltrosMongo(rawFiltros, ["nombre", "descripcion"])
+      : {};
+
+    const sortMongo = parsearOrdenamiento(orden);
+
+    const limitInt = parseInt(limite);
+    const pageInt = parseInt(pagina);
+    const skip = (pageInt - 1) * limitInt;
+
+    const [categorias, total] = await Promise.all([
+      Categoria.find(queryMongo).sort(sortMongo).skip(skip).limit(limitInt),
+      Categoria.countDocuments(queryMongo),
     ]);
 
     res.json({
       error: false,
-      metadata: { 
-        total, 
-        pagina_actual: pagina, 
-        paginas_totales: Math.ceil(total / limite),
-        limite 
+      metadata: {
+        total,
+        pagina_actual: pageInt,
+        paginas_totales: Math.ceil(total / limitInt),
+        limite: limitInt,
       },
-      Categoria
+      categorias,
     });
   } catch (error) {
     next(error);
   }
 };
 
+// Actualizar una categoria
 export const actualizar = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -113,6 +127,7 @@ export const actualizar = async (req, res, next) => {
   }
 };
 
+// Eliminar una categoria
 export const eliminar = async (req, res, next) => {
   try {
     const { id } = req.params;

@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const categorias = new mongoose.Schema(
   {
-    nombre: { type: String, requiered: true },
-    descripcion: { type: String, requiered: true },
-    imagen_icono: { type: String, requiered: false },
+    nombre: { type: String, required: true },
+    descripcion: { type: String, required: true },
+    imagen_icono: { type: String, required: false },
   },
 
   {

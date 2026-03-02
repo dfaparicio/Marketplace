@@ -6,15 +6,18 @@ import helmet from "helmet";
 import "dotenv/config";
 import { specs, swaggerUi, swaggerOptions } from "./src/config/swagger.js";
 import { conectarMongo } from "./src/config/database.js";
+import { limiterGeneral } from "./src/middlewares/rateLimit.js";
 
 
 
-// Aquí irían tus imports de rutas, por ejemplo:
+// Rutas
 import usuarioRoutes from "./src/routes/usuarioRoutes.js";
 import productoRoutes from "./src/routes/productoRoutes.js";
 import ordenRoutes from "./src/routes/ordenRoutes.js";
 import categoriaRoutes from "./src/routes/categoriaRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
+import iaRoutes from "./src/routes/geminiRoutes.js"
+import { log } from "console";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -92,15 +95,17 @@ app.get("/", (req, res) => {
   });
 });
 
-// app.use("/api/auth", authRoutes); // Ejemplo de uso de rutas
+app.use("/api", limiterGeneral);
+
+// Uso de rutas
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/productos", productoRoutes);
 app.use("/api/ordenes", ordenRoutes);
 app.use("/api/categorias", categoriaRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/ia", iaRoutes)
 
 // Manejo de rutas no encontradas (404)
-// Debe ir ANTES del manejador de errores global
 app.use((req, res) => {
   res.status(404).json({
     error: true,
@@ -126,6 +131,7 @@ app.use((err, req, res, next) => {
 
 // Inicio del servidor
 app.listen(PORT, () => {
+  console.log(`🛒 Marketplace Inteligente API 🛒`);
   console.log(`✅ Servidor corriendo en puerto ${PORT}`);
   console.log(`🌍 Entorno: ${process.env.NODE_ENV || "development"}`);
   console.log(

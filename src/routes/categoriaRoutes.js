@@ -32,6 +32,8 @@ const router = express.Router();
  *     summary: Listar todas las categorías
  *     tags:
  *       - Categorias
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: query
  *         name: q
@@ -57,14 +59,23 @@ const router = express.Router();
  *       200:
  *         description: Lista de categorías obtenida exitosamente
  */
-router.get("/", validacionesFiltros, validarCampos, listar);
+router.get(
+  "/",
+  autenticar,
+  validacionesFiltros,
+  validarCampos,
+  listar
+);
 
 /**
  * @swagger
  * /api/categorias/{id}:
  *   get:
  *     summary: Obtener una categoría por su ID
- *     tags: [Categorias]
+ *     tags:
+ *       - Categorias
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -78,15 +89,21 @@ router.get("/", validacionesFiltros, validarCampos, listar);
  *       404:
  *         description: Categoría no encontrada
  */
-// GET /api/categorias/:id - Obtener categoría por ID (Público)
-router.get("/:id", validacionParametroId, validarCampos, obtener);
+router.get(
+  "/:id",
+  autenticar,
+  validacionParametroId,
+  validarCampos,
+  obtener
+);
 
 /**
  * @swagger
  * /api/categorias:
  *   post:
  *     summary: Crear una nueva categoría (Solo Admin)
- *     tags: [Categorias]
+ *     tags:
+ *       - Categorias
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -111,23 +128,24 @@ router.get("/:id", validacionParametroId, validarCampos, obtener);
  *       403:
  *         description: Prohibido (No es admin)
  */
-// POST /api/categorias - Crear categoría (Solo Admin)
 router.post(
   "/",
   autenticar,
   requiereRol("admin"),
-    subirIconoCategoria,
+  subirIconoCategoria,
   validacionCrearCategoria,
   validarCampos,
-  crear,
+  crear
 );
 
 /**
  * @swagger
  * /api/categorias/{id}:
  *   put:
- *     summary: Actualizar una categoría (Solo Admin)
- *     tags: [Categorias]
+ *     summary: Actualizar una categoría
+ *     description: Modifica los datos de una categoría existente. Solo Admin.
+ *     tags:
+ *       - Categorias
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -136,6 +154,7 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID de la categoría a actualizar
  *     requestBody:
  *       required: true
  *       content:
@@ -145,11 +164,25 @@ router.post(
  *             properties:
  *               nombre:
  *                 type: string
+ *                 example: "Laptops"
+ *               descripcion:
+ *                 type: string
+ *                 example: "Equipos portátiles y ultrabooks"
+ *               imagen_icono:
+ *                 type: string
+ *                 example: "https://miapp.com/uploads/categorias/laptop.png"
  *     responses:
  *       200:
- *         description: Categoría actualizada
+ *         description: Categoría actualizada exitosamente
+ *       400:
+ *         description: Error en validación de datos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: No tiene permisos de administrador
+ *       404:
+ *         description: Categoría no encontrada
  */
-// PUT /api/categorias/:id - Actualizar categoría
 router.put(
   "/:id",
   autenticar,
@@ -157,7 +190,7 @@ router.put(
   validacionParametroId,
   validacionActualizarCategoria,
   validarCampos,
-  actualizar,
+  actualizar
 );
 
 /**
@@ -165,7 +198,8 @@ router.put(
  * /api/categorias/{id}:
  *   delete:
  *     summary: Eliminar una categoría (Solo Admin)
- *     tags: [Categorias]
+ *     tags:
+ *       - Categorias
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -178,14 +212,13 @@ router.put(
  *       200:
  *         description: Categoría eliminada
  */
-// DELETE /api/categorias/:id - Eliminar categoría
 router.delete(
   "/:id",
   autenticar,
   requiereRol("admin"),
   validacionParametroId,
   validarCampos,
-  eliminar,
+  eliminar
 );
 
 export default router;

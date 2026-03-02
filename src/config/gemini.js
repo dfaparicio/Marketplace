@@ -1,140 +1,91 @@
-import axios from "axios";
+import { GoogleGenAI } from '@google/genai';
+import Producto from "../models/Producto.js"
+import Categoria from "../models/Categoria.js"
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
+const ai = new GoogleGenAI({}); 
 
-// Configuración de instancia de Axios
-const client = axios.create({
-  baseURL: GEMINI_BASE_URL,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
+// Generar contenido de IA
 export const generarContenido = async (prompt, opciones = {}) => {
-  if (!GEMINI_API_KEY) {
-    throw new Error("API Key de Gemini no configurado");
-  }
-
   try {
-    const payload = {
-      contents: [
-        {
-          parts: [{ text: prompt }],
-        },
-      ],
-      generationConfig: {
-        temperature: opciones.temperatura || 0.7,
-        topK: opciones.topK || 40,
-        topP: opciones.topP || 0.95,
-        maxOutputTokens: opciones.maxTokens || 1024,
+    const respuesta = await ai.models.generateContent({
+
+      model: opciones.modelo ?? "gemini-3-flash-preview", 
+      contents: prompt,
+      config: {
+        systemInstruction: "Eres el motor de Inteligencia Artificial de un marketplace profesional. Tu objetivo es dar respuestas concretas, directas y de alto valor comercial. Mantén un tono corporativo, persuasivo y sin rodeos. Sé conciso pero completo, y jamás dejes una oración o idea a medias.",
+        
+        temperature: opciones.temperatura ?? 0.7, 
+        topK: opciones.topK ?? 40,
+        topP: opciones.topP ?? 0.95,
+        maxOutputTokens: opciones.maxTokens ?? 1024,
       },
-    };
-
-    // La API Key se pasa como query param en la URL
-    const response = await client.post(
-      `/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
-      payload,
-    );
-
-    if (!response.data.candidates || response.data.candidates.length === 0) {
-      throw new Error("No se recibió respuesta válida de Gemini");
-    }
-
-    const contenido = response.data.candidates[0].content.parts[0].text;
+    });
 
     return {
-      contenido,
-      metadata: {
-        tokens_utilizados: response.data.usageMetadata?.totalTokenCount || 0,
+      contenido: respuesta.text,
+      metadata: { 
+        tokens_utilizados: respuesta.usageMetadata?.totalTokenCount ?? 0 
       },
     };
   } catch (error) {
-    console.error("❌ Error en Gemini:", error.response?.data || error.message);
-
-    if (error.response?.status === 429) {
-      throw new Error("Límite de tasa de Gemini excedido. Intenta más tarde.");
-    }
-
-    throw new Error(`Error de Gemini: ${error.message}`);
+    console.error("[GenerarContenido] Error interno de Gemini:", error);
+  
+    const mensaje = error instanceof Error ? error.message : "Error desconocido";
+    throw new Error(`Error de IA: No se pudo generar el contenido (${mensaje})`);
   }
 };
 
-export const generarDescripcionProducto = async (
-  nombre,
-  categoria,
-  caracteristicas = "",
-) => {
+// Generar descripcion del producto
+export const generarDescripcionProducto = async (idProducto) => {
+  const producto = await Producto.findById(idProducto).populate("categoria_id", "nombre");
+  const categoriaNombre = producto.categoria_id ? producto.categoria_id.nombre : "General";
+
   const prompt = `
-    Eres un copywriter experto en e-commerce. Genera una descripción atractiva y profesional para este producto:
-    PRODUCTO: ${nombre}
-    CATEGORÍA: ${categoria}
-    CARACTERÍSTICAS: ${caracteristicas}
+    Actúa como un copywriter experto. Genera una descripción atractiva:
+    PRODUCTO: ${producto.nombre}
+    CATEGORÍA: ${categoriaNombre}
+    PRECIO: $${producto.precio}
+    STOCK ACTUAL: ${producto.stock} unidades
+    DESCRIPCIÓN BASE: ${producto.descripcion}
     
-    INSTRUCCIONES:
-    - Máximo 200 palabras
-    - Destaca beneficios, no solo características
-    - Usa un tono persuasivo pero profesional
-    - Estructura en párrafos cortos
-    Responde SOLO con la descripción, sin explicaciones adicionales.
+    INSTRUCCIONES: Máximo 200 palabras, estructurado en párrafos cortos, no dejes oraciones a medias.
   `;
 
-  const resultado = await generarContenido(prompt, {
-    temperatura: 0.8,
-    maxTokens: 300,
-  });
-
+  const resultado = await generarContenido(prompt, { temperatura: 0.8, maxTokens: 800 });
   return resultado.contenido.trim();
 };
 
-export const sugerirCategorias = async (nombreProducto, descripcion) => {
+// Sugerir categoria al usuario segun el producto
+export const sugerirCategorias = async (nombreproducto, descripcion) => {
+  const categoriadb = await Categoria.find().select("nombre");
+  const listacategoria = categoriadb.map((cat) => cat.nombre).join(", ");
+
   const prompt = `
-    Analiza este producto y sugiere las 3 categorías más apropiadas:
-    PRODUCTO: ${nombreProducto}
+    Sugiere las 3 categorías más apropiadas SOLO de esta lista: [${listacategoria}]
+    PRODUCTO: ${nombreproducto}
     DESCRIPCIÓN: ${descripcion}
     
-    CATEGORÍAS DISPONIBLES:
-    - Electrónicos
-    - Ropa y Accesorios
-    - Hogar y Jardín
-    - Deportes y Aire Libre
-    - Salud y Belleza
-    - Libros y Medios
-    - Juguetes y Juegos
-    
-    Responde con exactamente 3 categorías de la lista, separadas por comas, sin explicaciones.
+    Responde ÚNICAMENTE con las 3 categorías separadas por comas.
   `;
 
-  const resultado = await generarContenido(prompt, {
-    temperatura: 0.3,
-    maxTokens: 100,
-  });
-
-  return resultado.contenido
-    .trim()
-    .split(",")
-    .map((c) => c.trim());
+  const resultado = await generarContenido(prompt, { temperatura: 0.2, maxTokens: 100 });
+  return resultado.contenido.trim().split(",").map((c) => c.trim());
 };
 
-export const analizarPatronCompras = async (ordenes) => {
-  const resumen = ordenes.map((orden) => ({
+// Analizar las ordenes de un comprador 
+export const analizarPatronCompras = async (ordenesUsuario, usuario) => {
+  const resumen = ordenesUsuario.map((orden) => ({
     total: orden.total,
     fecha: orden.fecha_orden,
-    productos: orden.productos?.length || 0,
+    productos_comprados: orden.productos?.length || 0,
+    estado: orden.estado,
   }));
 
   const prompt = `
-    Analiza estos patrones de compra y genera insights:
+    Analiza este historial del usuario ${usuario.nombre} (Rol: ${usuario.rol}):
     DATOS: ${JSON.stringify(resumen)}
     
-    GENERA:
-    1. Patrón de frecuencia de compra
-    2. Promedio de gasto por orden
-    3. Tendencias temporales
-    4. Recomendaciones para el usuario
-    
-    Responde en formato JSON con esta estructura:
+    Responde SOLO un JSON con esta estructura exacta:
     {
       "frecuencia": "descripción",
       "promedio_gasto": número,
@@ -144,21 +95,10 @@ export const analizarPatronCompras = async (ordenes) => {
   `;
 
   try {
-    const resultado = await generarContenido(prompt, {
-      temperatura: 0.5,
-      maxTokens: 400,
-    });
-
-    // Intentamos limpiar el contenido por si Gemini devuelve markdown (```json ... ```)
+    const resultado = await generarContenido(prompt, { temperatura: 0.5, maxTokens: 1000 });
     const jsonLimpio = resultado.contenido.replace(/```json|```/g, "").trim();
     return JSON.parse(jsonLimpio);
   } catch (error) {
-    console.error("❌ Error parseando análisis de patrones:", error);
-    return {
-      frecuencia: "No se pudo analizar",
-      promedio_gasto: 0,
-      tendencias: "Datos insuficientes",
-      recomendaciones: [],
-    };
+    return { frecuencia: "Error", promedio_gasto: 0, tendencias: "Error", recomendaciones: [] };
   }
 };

@@ -1,6 +1,4 @@
-// src/utils/filtros.js
-
-// 1. Parsea listas separadas por comas (se queda igual)
+// Parsea listas separadas por comas
 export const parsearLista = (valor, tipo = "string") => {
   if (!valor) return null;
   const lista = valor
@@ -18,7 +16,7 @@ export const parsearLista = (valor, tipo = "string") => {
   }
 };
 
-// 2. Parsea el ordenamiento (Convertido a formato Mongo: { campo: 1 o -1 })
+// Parsea el ordenamiento (Convertido a formato Mongo: { campo: 1 o -1 })
 export const parsearOrdenamiento = (orden) => {
   if (!orden) return { createdAt: -1 }; // Por defecto: más recientes primero
 

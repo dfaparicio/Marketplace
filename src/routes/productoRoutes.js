@@ -32,6 +32,8 @@ const router = express.Router();
  *     summary: Listar todos los productos con filtros avanzados
  *     tags:
  *       - Productos
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: query
  *         name: q
@@ -73,15 +75,23 @@ const router = express.Router();
  *       200:
  *         description: Lista de productos obtenida exitosamente
  */
-router.get("/", validacionesFiltros, validarCampos, listar);
-
+router.get(
+  "/",
+  autenticar,
+  validacionesFiltros,
+  validarCampos,
+  listar
+);
 
 /**
  * @swagger
  * /api/productos/{id}:
  *   get:
  *     summary: Obtener un producto por ID
- *     tags: [Productos]
+ *     tags:
+ *       - Productos
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -94,15 +104,21 @@ router.get("/", validacionesFiltros, validarCampos, listar);
  *       404:
  *         description: Producto no encontrado
  */
-router.get("/:id", validacionParametroId, validarCampos, obtener);
-
+router.get(
+  "/:id",
+  autenticar,
+  validacionParametroId,
+  validarCampos,
+  obtener
+);
 
 /**
  * @swagger
  * /api/productos:
  *   post:
  *     summary: Crear un nuevo producto (Solo Vendedor)
- *     tags: [Productos]
+ *     tags:
+ *       - Productos
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -157,13 +173,14 @@ router.post(
   crear
 );
 
-
 /**
  * @swagger
  * /api/productos/{id}:
  *   put:
- *     summary: Actualizar un producto (Solo Vendedor)
- *     tags: [Productos]
+ *     summary: Actualizar un producto
+ *     description: Modifica los datos de un producto. Solo Vendedor.
+ *     tags:
+ *       - Productos
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -172,6 +189,7 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID del producto a actualizar
  *     requestBody:
  *       required: true
  *       content:
@@ -181,11 +199,30 @@ router.post(
  *             properties:
  *               nombre:
  *                 type: string
+ *                 example: "Asus Vivobook S16 OLED"
+ *               descripcion:
+ *                 type: string
+ *                 example: "Laptop Ryzen 7, 16GB RAM, 1TB SSD"
  *               precio:
  *                 type: number
+ *                 example: 4299.99
+ *               stock:
+ *                 type: number
+ *                 example: 15
+ *               imagen:
+ *                 type: string
+ *                 example: "https://miapp.com/uploads/productos/vivobook.png"
  *     responses:
  *       200:
- *         description: Producto actualizado
+ *         description: Producto actualizado exitosamente
+ *       400:
+ *         description: Error en validación de datos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: No tiene permisos de vendedor
+ *       404:
+ *         description: Producto no encontrado
  */
 router.put(
   "/:id",
@@ -197,13 +234,13 @@ router.put(
   actualizar
 );
 
-
 /**
  * @swagger
  * /api/productos/{id}:
  *   delete:
  *     summary: Eliminar un producto (Solo Vendedor)
- *     tags: [Productos]
+ *     tags:
+ *       - Productos
  *     security:
  *       - BearerAuth: []
  *     parameters:

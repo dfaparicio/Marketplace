@@ -2,13 +2,10 @@ import { verificarToken, extraerTokenDeHeader } from "../utils/jwt.js";
 import Usuario from "../models/Usuario.js";
 
 
-// Middleware para autenticar el JWT
-
 export const autenticar = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    // Validación preventiva: si no hay header, no intentamos extraer nada
     if (!authHeader) {
       return res.status(401).json({
         error: true,
@@ -28,25 +25,20 @@ export const autenticar = async (req, res, next) => {
       });
     }
 
-    // Inyectamos el usuario en la request para los siguientes middlewares
     req.usuario = usuario;
     next();
   } catch (error) {
     return res.status(401).json({
       error: true,
       mensaje: "Token inválido o expirado",
-      detalles: error.message, // Opcional, según qué tanto quieras mostrar al cliente
+      detalles: error.message,
     });
   }
 };
 
-/**
- * Middleware para control de acceso por roles
- * @param {string|string[]} rolesPermitidos
- */
 export const requiereRol = (rolesPermitidos) => {
   return (req, res, next) => {
-    // Si req.usuario no existe (porque olvidaste poner 'autenticar' antes)
+    
     if (!req.usuario) {
       return res.status(500).json({
         error: true,

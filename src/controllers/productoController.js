@@ -1,6 +1,7 @@
 import Producto from "../models/Producto.js";
 import { construirFiltrosMongo, parsearOrdenamiento, parsearLista } from '../utils/filtros.js';
 
+// Crear productos
 export const crear = async (req, res, next) => {
   try {
     const { nombre, descripcion, precio, stock, vendedor_id, categoria_id } =
@@ -35,6 +36,8 @@ export const crear = async (req, res, next) => {
   }
 };
 
+
+// Buscar producto por id
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -56,6 +59,7 @@ export const obtener = async (req, res, next) => {
   }
 };
 
+// Listar productos segun filtros
 export const listar = async (req, res, next) => {
   try {
     // 1. Armar filtros crudos
@@ -84,12 +88,11 @@ export const listar = async (req, res, next) => {
         .sort(sortMongo)
         .skip(skip)
         .limit(limite)
-        .populate('vendedor_id', 'nombre email') // Opcional: Trae info del vendedor
-        .populate('categoria_id', 'nombre'),     // Opcional: Trae info de la categoría
+        .populate('vendedor_id', 'nombre email') // Info del vendedor
+        .populate('categoria_id', 'nombre'),     // Info de la categoría
       Producto.countDocuments(queryMongo)
     ]);
 
-    // 5. Devolver con metadatos
     res.json({
       error: false,
       metadata: { total, pagina_actual: pagina, paginas_totales: Math.ceil(total / limite), limite },
@@ -100,6 +103,7 @@ export const listar = async (req, res, next) => {
   }
 };
 
+// Actualizar un producto
 export const actualizar = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -128,9 +132,11 @@ export const actualizar = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
-  }
+  } 
 };
 
+
+// Eliminar un producto
 export const eliminar = async (req, res, next) => {
   try {
     const { id } = req.params;

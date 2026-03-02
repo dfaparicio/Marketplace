@@ -3,8 +3,7 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key";
 const JWT_EXPIRE = process.env.JWT_EXPIRE || "7d";
 
-// Genera un JWT firmado para un usuario específico
-
+// Genera token 
 export const generarToken = (usuario) => {
   const payload = {
     id: usuario.id,
@@ -20,8 +19,7 @@ export const generarToken = (usuario) => {
   });
 };
 
-// Verifica la autenticidad y vigencia de un token
-
+// Verifica autenticidad y le da vigencia alk token 
 export const verificarToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET, {

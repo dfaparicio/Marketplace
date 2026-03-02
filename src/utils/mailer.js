@@ -1,19 +1,15 @@
 import nodemailer from "nodemailer";
 
-// Configuración del transportador (el "cartero")
+// Configuracion del correo para los envios de codigos
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Puedes cambiarlo a 'hotmail', 'outlook', etc.
+  service: "gmail", 
   auth: {
-    user: process.env.EMAIL_USER, // Tu correo
-    pass: process.env.EMAIL_PASS, // Contraseña de aplicación
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS, 
   },
 });
 
-/**
- * Función para enviar el correo con el código de recuperación
- * @param {string} correo - Email del usuario destino
- * @param {string} codigo - Código de 6 dígitos generado
- */
+
 export const correoRecuperacion = async (correo, codigo) => {
   try {
     const mailOptions = {
@@ -36,9 +32,9 @@ export const correoRecuperacion = async (correo, codigo) => {
 
     const info = await transporter.sendMail(mailOptions);
     console.log("Correo enviado correctamente:", info.messageId);
-    return true; // Retornamos true si salió bien
+    return true; 
   } catch (error) {
     console.error("Error al enviar el correo de recuperación:", error);
-    return false; // Retornamos false si falló
+    return false; 
   }
 };

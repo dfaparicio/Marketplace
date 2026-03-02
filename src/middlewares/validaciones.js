@@ -297,3 +297,41 @@ export const validacionesFiltros = [
     .isIn(["comprador", "vendedor", "admin"])
     .withMessage("Rol no válido"),
 ];
+
+export const validacionGenerarDescripcion = [
+  body("idProducto")
+    .trim()
+    .notEmpty()
+    .withMessage("El idProducto es obligatorio")
+    .isMongoId()
+    .withMessage("El idProducto debe ser un ID de MongoDB válido")
+];
+
+export const validacionSugerirCategorias = [
+  body("nombreProducto")
+    .trim()
+    .notEmpty()
+    .withMessage("El nombre del producto es obligatorio")
+    .isLength({ max: 150 })
+    .withMessage("El nombre del producto es demasiado largo"),
+  
+  body("descripcion")
+    .trim()
+    .notEmpty()
+    .withMessage("La descripción es obligatoria")
+    .isString()
+    .withMessage("La descripción debe ser texto")
+    .isLength({ min: 10, max: 1000 })
+    .withMessage("La descripción debe tener entre 10 y 1000 caracteres para poder analizarla")
+];
+
+export const validacionChat = [
+  body("pregunta")
+    .trim()
+    .notEmpty()
+    .withMessage("La pregunta es obligatoria")
+    .isString()
+    .withMessage("La pregunta debe ser texto")
+    .isLength({ min: 5, max: 500 })
+    .withMessage("La pregunta debe tener entre 5 y 500 caracteres para evitar abusos en el sistema")
+];

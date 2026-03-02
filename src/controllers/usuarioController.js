@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import Usuario from "../models/Usuario.js";
 import { construirFiltrosMongo, parsearOrdenamiento } from '../utils/filtros.js';
 
+// Crear usaurios
 export const crear = async (req, res, next) => {
   try {
     const { nombre, email, password, rol } = req.body;
@@ -33,6 +34,7 @@ export const crear = async (req, res, next) => {
   }
 };
 
+// Buscar usuarios por id 
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -54,6 +56,7 @@ export const obtener = async (req, res, next) => {
   }
 };
 
+// Listar usuarios segun filtros
 export const listar = async (req, res, next) => {
   try {
     const rawFiltros = {
@@ -61,7 +64,6 @@ export const listar = async (req, res, next) => {
       busqueda: req.query.q,
     };
 
-    // Que busque por nombre o email
     const queryMongo = construirFiltrosMongo(rawFiltros, ["nombre", "email"]);
     const sortMongo = parsearOrdenamiento(req.query.orden);
 
@@ -84,6 +86,7 @@ export const listar = async (req, res, next) => {
   }
 };
 
+// Actualziar usuarios
 export const actualizar = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -118,7 +121,7 @@ export const actualizar = async (req, res, next) => {
     next(error);
   }
 };
-
+ // Eliminar un usuario
 export const eliminar = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -142,11 +145,11 @@ export const eliminar = async (req, res, next) => {
   }
 };
 
+// Cambio de contraseña de un usuario
 export const cambiarContraseña = async (req, res, next) => {
   try {
     const { passwordActual, nuevaPassword } = req.body;
     
-    // El id viene del token JWT que valida la ruta (asumiendo que tu middleware lo inyecta ahí)
     const usuarioId = req.usuario.id; 
 
     const usuario = await Usuario.findById(usuarioId).select('+password');
@@ -158,7 +161,6 @@ export const cambiarContraseña = async (req, res, next) => {
       });
     }
 
-    // 1. Verificar que la contraseña actual ingresada coincida con la de la DB
     const passwordValida = await bcrypt.compare(passwordActual, usuario.password);
     
     if (!passwordValida) {
@@ -168,7 +170,6 @@ export const cambiarContraseña = async (req, res, next) => {
       });
     }
 
-    // 2. Hashear y guardar la nueva contraseña
     usuario.password = await bcrypt.hash(nuevaPassword, 12);
     await usuario.save();
 

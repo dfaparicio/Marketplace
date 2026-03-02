@@ -1,6 +1,7 @@
 import Orden from "../models/Orden.js";
 import { construirFiltrosMongo, parsearOrdenamiento } from '../utils/filtros.js';
 
+// Crear orden 
 export const crear = async (req, res, next) => {
   try {
     const { productos, total, estado, direccion_envio, notas } = req.body;
@@ -25,6 +26,7 @@ export const crear = async (req, res, next) => {
   }
 };
 
+// Buscar orden pro id 
 export const obtener = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -47,6 +49,7 @@ export const obtener = async (req, res, next) => {
   }
 };
 
+// Listar ordenes segun filtros
 export const listar = async (req, res, next) => {
   try {
     const rawFiltros = {
@@ -71,6 +74,7 @@ export const listar = async (req, res, next) => {
   }
 };
 
+// Actualizar una orden 
 export const actualizar = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -109,6 +113,7 @@ export const actualizar = async (req, res, next) => {
   }
 };
 
+// Anular una orden si esta en estado pendiente a cancelado, no se debe borrar ordenes 
 export const anular = async (req, res, next) => {
   try {
     const { id } = req.params;

@@ -28,13 +28,9 @@ const router = express.Router();
  *     description: Gestión de usuarios del marketplace
  */
 
-/* =====================================================
-   1️⃣ RUTAS ESTÁTICAS
-===================================================== */
-
 /**
  * @swagger
- * /api/usuarios/update-password:
+ * /api/usuarios/updatePassword:
  *   put:
  *     summary: Cambia la contraseña del usuario autenticado
  *     tags:
@@ -68,7 +64,7 @@ const router = express.Router();
  *         description: Usuario no encontrado
  */
 router.put(
-  "/update-password",
+  "/updatePassword",
   autenticar,
   validacioncambioContraseña,
   validarCampos,
@@ -140,6 +136,8 @@ router.get(
  *     description: Registro público para compradores o vendedores.
  *     tags:
  *       - Usuarios
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -158,11 +156,6 @@ router.post(
   validarCampos,
   crear
 );
-
-
-/* =====================================================
-   2️⃣ RUTAS DINÁMICAS
-===================================================== */
 
 /**
  * @swagger
@@ -230,6 +223,10 @@ router.get(
  *         description: Usuario actualizado exitosamente
  *       400:
  *         description: Error en validación
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: No tiene permisos de administrador
  *       404:
  *         description: Usuario no encontrado
  */

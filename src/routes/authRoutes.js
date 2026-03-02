@@ -8,6 +8,7 @@ import {
 } from "../middlewares/validaciones.js";
 import { validarCampos } from "../middlewares/validarCampos.js";
 import { autenticar } from "../middlewares/auth.js";
+import { limiterAuth } from "../middlewares/rateLimit.js";
 
 const router = express.Router();
 
@@ -64,6 +65,7 @@ const router = express.Router();
  */
 router.post(
   "/registro",
+  limiterAuth,
   validacionCrearUsuario,
   validarCampos,
   registro
@@ -93,7 +95,7 @@ router.post(
  *         description: Credenciales incorrectas
  */
 // POST /api/auth/login - Iniciar sesión (Público)
-router.post("/login", validacionLogin, validarCampos, login);
+router.post("/login", limiterAuth, validacionLogin, validarCampos, login);
 
 /**
  * @swagger
@@ -115,7 +117,7 @@ router.get("/perfil", autenticar, validarCampos, perfil);
 
 /**
  * @swagger
- * /api/auth/forgot-password:
+ * /api/auth/forgotPassword:
  *   post:
  *     summary: Solicita un código de recuperación de contraseña
  *     tags: [Auth]
@@ -141,7 +143,8 @@ router.get("/perfil", autenticar, validarCampos, perfil);
  *         description: Error en el servidor al enviar el correo
  */
 router.post(
-  '/forgot-password',
+  '/forgotPassword',
+  limiterAuth,
   validacionforgotPassword,
   validarCampos,
   forgotPassword
@@ -149,7 +152,7 @@ router.post(
 
 /**
  * @swagger
- * /api/auth/reset-password:
+ * /api/auth/resetPassword:
  *   post:
  *     summary: Restablece la contraseña usando el código del correo
  *     tags: [Auth]
@@ -182,7 +185,8 @@ router.post(
  *         description: Código inválido, expirado o datos incorrectos
  */
 router.post(
-  '/reset-password',
+  '/resetPassword',
+  limiterAuth,
   validacionresetPassword,
   validarCampos,
   resetPassword

@@ -54,14 +54,21 @@ const router = express.Router();
  *       200:
  *         description: Lista de órdenes obtenida
  */
-router.get("/", autenticar, validacionesFiltros, validarCampos, listar);
+router.get(
+  "/",
+  autenticar,
+  validacionesFiltros,
+  validarCampos,
+  listar
+);
 
 /**
  * @swagger
  * /api/ordenes:
  *   post:
  *     summary: Crear una nueva orden (Solo Comprador)
- *     tags: [Ordenes]
+ *     tags:
+ *       - Ordenes
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -127,7 +134,8 @@ router.post(
  * /api/ordenes/anular/{id}:
  *   patch:
  *     summary: Anular una orden (Solo si está pendiente)
- *     tags: [Ordenes]
+ *     tags:
+ *       - Ordenes
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -148,6 +156,7 @@ router.post(
 router.patch(
   "/anular/:id",
   autenticar,
+  validacionParametroId,
   validacionAnularOrden,
   validarCampos,
   anular
@@ -158,7 +167,8 @@ router.patch(
  * /api/ordenes/{id}:
  *   get:
  *     summary: Obtener una orden específica por ID
- *     tags: [Ordenes]
+ *     tags:
+ *       - Ordenes
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -173,14 +183,22 @@ router.patch(
  *       404:
  *         description: Orden no encontrada
  */
-router.get("/:id", autenticar, validacionParametroId, validarCampos, obtener);
+router.get(
+  "/:id",
+  autenticar,
+  validacionParametroId,
+  validarCampos,
+  obtener
+);
 
 /**
  * @swagger
  * /api/ordenes/{id}:
  *   put:
- *     summary: Actualizar una orden (Solo si está pendiente)
- *     tags: [Ordenes]
+ *     summary: Actualizar una orden
+ *     description: Modifica una orden existente solo si su estado es "pendiente".
+ *     tags:
+ *       - Ordenes
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -211,16 +229,20 @@ router.get("/:id", autenticar, validacionParametroId, validarCampos, obtener);
  *         description: Orden actualizada correctamente
  *       400:
  *         description: Error de validación o la orden no está en estado pendiente
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: No tiene permisos para modificar esta orden
  *       404:
  *         description: Orden no encontrada
  */
 router.put(
   "/:id",
   autenticar,
+  validacionParametroId,
   validacionActualizarOrden,
   validarCampos,
   actualizar
 );
 
-
-export default router
+export default router;
