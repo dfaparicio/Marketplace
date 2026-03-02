@@ -17,7 +17,6 @@ import ordenRoutes from "./src/routes/ordenRoutes.js";
 import categoriaRoutes from "./src/routes/categoriaRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import iaRoutes from "./src/routes/geminiRoutes.js"
-import { log } from "console";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
